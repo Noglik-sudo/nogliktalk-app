@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoglikTalk</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', Arial, sans-serif; }
+        body { background-color: #000000; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 14px; }
+        
+        /* Главный экран */
+        .header { padding: 20px 20px 10px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 22px; font-weight: 600; letter-spacing: 0.5px; color: #e0e0e0; }
+        .header .profile-btn { background-color: #1a1a1a; border: 1px solid #2a2a2a; color: #e0e0e0; width: 40px; height: 40px; border-radius: 50%; font-size: 16px; cursor: pointer; overflow: hidden; }
+        .header .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .search-bar { padding: 0 20px 15px; }
+        .search-bar input { width: 100%; padding: 12px 16px; border-radius: 4px; border: 1px solid #2a2a2a; background-color: #1a1a1a; color: #e0e0e0; outline: none; font-size: 14px; }
+        .search-bar input::placeholder { color: #6a6a6a; }
+
+        .main-content { flex: 1; overflow-y: auto; padding-bottom: 100px; }
+
+        .section { padding: 15px 20px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .section-title { font-size: 16px; font-weight: 600; color: #e0e0e0; }
+        .section-more { font-size: 13px; color: #6a6a6a; cursor: pointer; }
+        .section-content { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 5px; }
+
+        .char-card { min-width: 100px; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .char-card .avatar { width: 80px; height: 80px; border-radius: 50%; overflow: hidden; border: 1px solid #4a4a4a; background-color: #1a1a1a; }
+        .char-card .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .char-card .name { font-size: 13px; margin-top: 8px; color: #e0e0e0; text-align: center; }
+
+        /* Нижняя панель */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background-color: #0a0a0a; border-top: 1px solid #1a1a1a; display: flex; justify-content: space-around; align-items: center; z-index: 50; }
+        .nav-btn { background: none; border: none; color: #6a6a6a; font-size: 22px; cursor: pointer; flex: 1; height: 100%; display: flex; justify-content: center; align-items: center; }
+        .nav-btn.active { color: #e0e0e0; }
+        .nav-btn-center { background-color: #4a4a4a; color: #e0e0e0; width: 55px; height: 55px; border-radius: 50%; font-size: 28px; cursor: pointer; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
+        .nav-btn-center:active { background-color: #5a5a5a; }
+
+        /* Экран чатов */
+        #chats-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000000; z-index: 100; flex-direction: column; padding-bottom: 70px; }
+        #chats-screen.active { display: flex; }
+        .chat-list { flex: 1; overflow-y: auto; padding: 10px 0; }
+        .chat-item { display: flex; align-items: center; padding: 12px 20px; gap: 15px; cursor: pointer; border-bottom: 1px solid #1a1a1a; }
+        .chat-item:active { background-color: #1a1a1a; }
+        .chat-avatar { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 1px solid #4a4a4a; background-color: #1a1a1a; }
+        .chat-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .chat-info { flex: 1; min-width: 0; }
+        .chat-name { font-size: 15px; font-weight: 500; color: #e0e0e0; margin-bottom: 4px; }
+        .chat-last { font-size: 13px; color: #8e8e93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Экран чата с персонажем */
+        #chat-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000000; z-index: 100; flex-direction: column; }
+        #chat-screen.active { display: flex; }
+        .chat-header { padding: 15px 20px; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; gap: 15px; background-color: #000000; }
+        .chat-header button { background: none; border: none; color: #e0e0e0; font-size: 20px; cursor: pointer; }
+        .chat-header .header-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 1px solid #4a4a4a; }
+        .chat-header .header-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .chat-header-info { flex: 1; }
+        #chat-name-header { font-weight: 500; font-size: 15px; color: #e0e0e0; }
+        .chat-status { font-size: 12px; color: #8e8e93; }
+        #messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background-color: #000000; }
+        .msg { padding: 12px 16px; border-radius: 4px; max-width: 80%; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+        .msg.user { background-color: #1a1a1a; color: #e0e0e0; align-self: flex-end; }
+        .msg.bot { background-color: #2a2a2a; color: #e0e0e0; align-self: flex-start; }
+        .chat-input-panel { padding: 15px 20px; display: flex; gap: 10px; border-top: 1px solid #1a1a1a; background-color: #0a0a0a; }
+        #user-input { flex: 1; padding: 12px 16px; border-radius: 4px; border: 1px solid #2a2a2a; background-color: #1a1a1a; color: #e0e0e0; outline: none; font-size: 14px; }
+        #user-input::placeholder { color: #6a6a6a; }
+        #send-btn { background-color: #4a4a4a; color: #e0e0e0; border: none; border-radius: 4px; width: 44px; height: 44px; cursor: pointer; font-size: 16px; flex-shrink: 0; }
+
+        /* Экран создания */
+        #create-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000000; z-index: 100; flex-direction: column; }
+        #create-screen.active { display: flex; }
+        .create-form { padding: 20px; display: flex; flex-direction: column; gap: 15px; flex: 1; overflow-y: auto; }
+        .create-form input, .create-form textarea { padding: 12px 16px; border-radius: 4px; border: 1px solid #2a2a2a; background-color: #1a1a1a; color: #e0e0e0; outline: none; font-size: 14px; }
+        .create-form textarea { resize: none; height: 80px; }
+        .create-form input::placeholder, .create-form textarea::placeholder { color: #6a6a6a; }
+        .create-form button { padding: 14px; border-radius: 4px; border: none; background-color: #4a4a4a; color: #e0e0e0; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 10px; }
+        .avatar-upload { width: 90px; height: 90px; border-radius: 50%; border: 1px solid #4a4a4a; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px; color: #6a6a6a; font-size: 28px; cursor: pointer; background-color: #1a1a1a; }
+    </style>
+</head>
+<body>
+
+    <!-- ГЛАВНЫЙ ЭКРАН -->
+    <div id="main-screen">
+        <div class="header">
+            <h1>NoglikTalk</h1>
+            <button class="profile-btn" onclick="alert('Профиль скоро')">👤</button>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" placeholder="Найти персонажа...">
+        </div>
+
+        <div class="main-content">
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-title">От автора</span>
+                    <span class="section-more">Все →</span>
+                </div>
+                <div class="section-content" id="section-author"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-title">Популярные</span>
+                    <span class="section-more">Все →</span>
+                </div>
+                <div class="section-content" id="section-popular"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-title">Рекомендации</span>
+                    <span class="section-more">Все →</span>
+                </div>
+                <div class="section-content" id="section-recommend"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- НИЖНЯЯ ПАНЕЛЬ -->
+    <div class="bottom-nav">
+        <button class="nav-btn active" onclick="showMain()">🏠</button>
+        <button class="nav-btn-center" onclick="showCreate()">+</button>
+        <button class="nav-btn" onclick="showChats()">💬</button>
+    </div>
+
+    <!-- ЭКРАН ЧАТОВ -->
+    <div id="chats-screen">
+        <div class="chat-header">
+            <button onclick="showMain()">←</button>
+            <span style="font-weight: 500;">Чаты</span>
+        </div>
+        <div class="chat-list" id="chat-list"></div>
+    </div>
+
+    <!-- ЭКРАН ЧАТА С ПЕРСОНАЖЕМ -->
+    <div id="chat-screen">
+        <div class="chat-header">
+            <button onclick="hideChat()">←</button>
+            <div class="header-avatar" id="header-avatar"></div>
+            <div class="chat-header-info">
+                <div id="chat-name-header"></div>
+                <div class="chat-status">В сети</div>
+            </div>
+        </div>
+        <div id="messages"></div>
+        <div class="chat-input-panel">
+            <input id="user-input" type="text" placeholder="Напиши...">
+            <button id="send-btn" onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+
+    <!-- ЭКРАН СОЗДАНИЯ -->
+    <div id="create-screen">
+        <div class="chat-header">
+            <button onclick="hideCreate()">←</button>
+            <span>Новый персонаж</span>
+        </div>
+        <div class="create-form">
+            <div class="avatar-upload">📷</div>
+            <input id="new-name" type="text" placeholder="Имя персонажа">
+            <input id="new-greeting" type="text" placeholder="Приветствие">
+            <textarea id="new-character" placeholder="Краткое описание (кто это)"></textarea>
+            <textarea id="new-style" placeholder="Характер"></textarea>
+            <textarea id="new-style2" placeholder="Стиль общения"></textarea>
+            <button onclick="createCharacter()">Создать</button>
+        </div>
+    </div>
+ <script>
+   const SYSTEM_CHARS = [
+    { name: "Сократ", avatar: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_00000000356881f48a43afc0e32e8bb1.png", description: "Древнегреческий философ", greeting: "ПРИВЕТ, Я СОКРАТ. СПРАШИВАЙ.", personaId: "socrat" },
+    { name: "Пушкин", avatar: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000061f4820abb3f3b2e616bda30.png", description: "Поэт, говорит рифмами", greeting: "Приветствую, мой друг! Я Пушкин, поэт.", personaId: "pushkin" },
+    { name: "Сталин", avatar: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000056ac81f4b9167adb3b61206f.png", description: "Строгий, холодный", greeting: "Здравствуй. Говори по делу.", personaId: "stalin" },
+    { name: "Братюня", avatar: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000026308210bd3e70e4c1c72dc3.png", description: "Лучший друг", greeting: "Здарова, братан! Как сам?", personaId: "bratunya" },
+    { name: "Та самая", avatar: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000030a48211ad9240c36185feb6.png", description: "13 лет, блондинка, просит помочь", greeting: "Привет! Помоги с физикой!", personaId: "ta_samaya" },
+    { name: "Обычный ИИ", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AI&backgroundColor=1a1a1a", description: "Помощник на все случаи", greeting: "Здравствуйте! Чем помочь?", personaId: "default" }
+];
+
+let userChars = JSON.parse(localStorage.getItem("noglik_user_characters")) || [];
+let characters = [...SYSTEM_CHARS, ...userChars];
+
+        let currentChar = null;
+
+        function saveCharacters() { localStorage.setItem("noglik_characters", JSON.stringify(characters)); }
+
+        function renderSections() {
+            const author = document.getElementById("section-author");
+            const popular = document.getElementById("section-popular");
+            const recommend = document.getElementById("section-recommend");
+            author.innerHTML = "";
+            popular.innerHTML = "";
+            recommend.innerHTML = "";
+            
+            characters.forEach((char, index) => {
+                const card = document.createElement("div");
+                card.className = "char-card";
+                card.onclick = () => openChat(index);
+                card.innerHTML = `
+                    <div class="avatar"><img src="${char.avatar}"></div>
+                    <div class="name">${char.name}</div>
+                `;
+                author.appendChild(card);
+                popular.appendChild(card.cloneNode(true));
+                recommend.appendChild(card.cloneNode(true));
+            });
+        }
+
+        function renderChatList() {
+            const list = document.getElementById("chat-list");
+            list.innerHTML = "";
+            characters.forEach((char, index) => {
+                const item = document.createElement("div");
+                item.className = "chat-item";
+                item.onclick = () => openChat(index);
+                const history = JSON.parse(localStorage.getItem("noglik_chat_" + char.name)) || [];
+                const lastMsg = history.length > 0 ? history[history.length - 1].text : char.description;
+                item.innerHTML = `
+                    <div class="chat-avatar"><img src="${char.avatar}"></div>
+                    <div class="chat-info">
+                        <div class="chat-name">${char.name}</div>
+                        <div class="chat-last">${lastMsg}</div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function showMain() {
+            document.getElementById("chats-screen").classList.remove("active");
+            document.getElementById("chat-screen").classList.remove("active");
+            document.getElementById("create-screen").classList.remove("active");
+            document.getElementById("main-screen").style.display = "block";
+        }
+
+        function showChats() {
+            document.getElementById("main-screen").style.display = "none";
+            document.getElementById("chats-screen").classList.add("active");
+            renderChatList();
+        }
+
+        function openChat(index) {
+            currentChar = characters[index];
+            document.getElementById("chat-name-header").textContent = currentChar.name;
+            document.getElementById("header-avatar").innerHTML = `<img src="${currentChar.avatar}">`;
+            document.getElementById("messages").innerHTML = "";
+            loadHistory(currentChar.name);
+            document.getElementById("main-screen").style.display = "none";
+            document.getElementById("chats-screen").classList.remove("active");
+            document.getElementById("chat-screen").classList.add("active");
+        }
+
+        function hideChat() {
+            document.getElementById("chat-screen").classList.remove("active");
+            document.getElementById("main-screen").style.display = "block";
+            currentChar = null;
+        }
+
+        function getHistoryKey(name) { return "noglik_chat_" + name; }
+
+        function loadHistory(name) {
+            const history = JSON.parse(localStorage.getItem(getHistoryKey(name))) || [];
+            const char = characters.find(c => c.name === name);
+            if (history.length === 0) {
+                addMessage(char.greeting, "bot");
+                saveHistory(name, [{ text: char.greeting, sender: "bot" }]);
+            } else {
+                history.forEach(m => addMessage(m.text, m.sender));
+            }
+        }
+
+        function saveHistory(name, history) { localStorage.setItem(getHistoryKey(name), JSON.stringify(history)); }
+
+        function addMessage(text, sender) {
+            const messages = document.getElementById("messages");
+            const msg = document.createElement("div");
+            msg.className = "msg " + sender;
+            msg.textContent = text;
+            messages.appendChild(msg);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById("user-input");
+            const text = input.value.trim();
+            if (!text || !currentChar) return;
+            addMessage(text, "user");
+            const history = JSON.parse(localStorage.getItem(getHistoryKey(currentChar.name))) || [];
+            history.push({ text: text, sender: "user" });
+            saveHistory(currentChar.name, history);
+            input.value = "";
+            try {
+                const response = await fetch("http://localhost:5000/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: text, persona: currentChar.personaId })
+                });
+                const data = await response.json();
+                const reply = data.reply || "Нет ответа";
+                addMessage(reply, "bot");
+                history.push({ text: reply, sender: "bot" });
+                saveHistory(currentChar.name, history);
+            } catch (e) {
+                addMessage("Сервер не отвечает. Запусти python server.py", "bot");
+            }
+        }
+
+        function showCreate() {
+            document.getElementById("main-screen").style.display = "none";
+            document.getElementById("create-screen").classList.add("active");
+        }
+
+        function hideCreate() {
+            document.getElementById("create-screen").classList.remove("active");
+            document.getElementById("main-screen").style.display = "block";
+        }
+
+        function createCharacter() {
+            const nameVal = document.getElementById("new-name").value.trim();
+            const greetingVal = document.getElementById("new-greeting").value.trim();
+            const characterVal = document.getElementById("new-character").value.trim();
+            if (!nameVal || !greetingVal) { alert("Имя и приветствие обязательны!"); return; }
+            const newChar = {
+                name: nameVal,
+                avatar: "https://ui-avatars.com/api/?name=" + encodeURIComponent(nameVal) + "&background=1a1a1a&color=e0e0e0&size=200",
+                description: characterVal || "Мой персонаж",
+                greeting: greetingVal,
+                personaId: "custom_" + Date.now()
+            };
+            characters.push(newChar);
+            saveCharacters();
+            hideCreate();
+            renderSections();
+            document.getElementById("new-name").value = "";
+            document.getElementById("new-greeting").value = "";
+            document.getElementById("new-character").value = "";
+        }
+
+        document.getElementById("user-input").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+        });
+
+        renderSections();
+    </script)>
+
+</body>
+</html>
