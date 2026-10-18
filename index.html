@@ -184,29 +184,41 @@ let characters = [...SYSTEM_CHARS, ...userChars];
 
         let currentChar = null;
 
-        function saveCharacters() { localStorage.setItem("noglik_characters", JSON.stringify(characters)); }
+function saveCharacters() {
+  const customCharacters = characters.filter(char => {
+    if (!char) return false;
+    const id = char.personaId;
+    return typeof id === 'string' && id.startsWith('custom_');
+  });
+
+  localStorage.setItem(
+    'noglik_user_characters',
+    JSON.stringify(customCharacters)
+  );
+}
+
 
         function renderSections() {
-            const author = document.getElementById("section-author");
-            const popular = document.getElementById("section-popular");
-            const recommend = document.getElementById("section-recommend");
-            author.innerHTML = "";
-            popular.innerHTML = "";
-            recommend.innerHTML = "";
-            
-            characters.forEach((char, index) => {
-                const card = document.createElement("div");
-                card.className = "char-card";
-                card.onclick = () => openChat(index);
-                card.innerHTML = `
-                    <div class="avatar"><img src="${char.avatar}"></div>
-                    <div class="name">${char.name}</div>
-                `;
-                author.appendChild(card);
-                popular.appendChild(card.cloneNode(true));
-                recommend.appendChild(card.cloneNode(true));
-            });
-        }
+    const author = document.getElementById("section-author");
+    const popular = document.getElementById("section-popular");
+    const recommend = document.getElementById("section-recommend");
+
+    author.innerHTML = "";
+    popular.innerHTML = "";
+    recommend.innerHTML = "";
+
+    characters.forEach((char, index) => {
+        function createCard() {
+            const card = document.createElement("div");
+            card.className = "char-card";
+
+            card.onclick = () => openChat(index);
+
+            const avatar = document.createElement("div");
+            avatar.className = "avatar";
+
+            const img
+
 
         function renderChatList() {
             const list = document.getElementById("chat-list");
@@ -292,7 +304,7 @@ let characters = [...SYSTEM_CHARS, ...userChars];
             saveHistory(currentChar.name, history);
             input.value = "";
             try {
-                const response = await fetch("http://localhost:5000/chat", {
+                const response = await fetch("/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ message: text, persona: currentChar.personaId })
@@ -333,6 +345,7 @@ let characters = [...SYSTEM_CHARS, ...userChars];
             saveCharacters();
             hideCreate();
             renderSections();
+            renderChatList();
             document.getElementById("new-name").value = "";
             document.getElementById("new-greeting").value = "";
             document.getElementById("new-character").value = "";
@@ -343,7 +356,7 @@ let characters = [...SYSTEM_CHARS, ...userChars];
         });
 
         renderSections();
-    </script)>
+    </script>
 
 </body>
 </html>
