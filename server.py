@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import requests
 
@@ -50,15 +50,34 @@ DEFAULT_PROMPT = """
 Коротко: 2–4 предложения. По делу.
 """
 
+import os
+from flask import Flask, request, jsonify, send_file
+
+app = Flask(__name__)
+
 @app.route("/")
 def index():
-    return send_file("index.html")
+    html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "index.html")
+    return send_file(html_path)
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.json
-    message = data.get("message")
-    persona = data.get("persona")
+    data = request.get_json(silent=True) or {}
+message = data.get("message")
+persona = data.get("persona", "default")
+
+if not isinstance(message, str) or not message.strip():
+    return jsonify({"reply": "Напиши сообщение, братан!"}), 400
+
+message = message.strip()
+
+if len(message) > 10000:
+    return jsonify({"reply": "Сообщение слишком длинное."}), 400
+
+if not API_KEY:
+    app.logger.error("Не задана переменная GOOGLE_API_KEY")
+    return jsonify({"reply": "ИИ пока недоступен: не настроен ключ API."}), 503
 
     if persona == "socrat":
         prompt = SOCRAT_PROMPT
@@ -72,25 +91,52 @@ def chat():
         prompt = TA_SAMAYA_PROMPT
     else:
         prompt = DEFAULT_PROMPT
+url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={API_KEY}"
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={API_KEY}"
-
+try:
     response = requests.post(
         url,
         json={
-            "contents": [{
-                "parts": [{"text": prompt + "\n\nПользователь: " + message}]
-            }]
-        }
+            "contents": [
+                {
+                    "parts": [
+                        {"text": prompt + "\n\nПользователь: " + message}
+                    ]
+                }
+            ]
+        },
+        timeout=30
     )
-
+    response.raise_for_status()
     result = response.json()
 
-    if "candidates" in result:
-        reply = result["candidates"][0]["content"]["parts"][0]["text"]
-        return jsonify({"reply": reply})
-    else:
-        return jsonify({"reply": "Ошибка. Попробуй позже. " + str(result.get("error", ""))})
+except requests.RequestException:
+    app.logger.exception("Ошибка запроса к Google API")
+    return jsonify({
+        "reply": "Не удалось связаться с ИИ. Попробуй позже."
+    }), 502
+
+except ValueError:
+    app.logger.exception("Google API вернул некорректный ответ")
+    return jsonify({
+        "reply": "ИИ вернул некорректный ответ. Попробуй позже."
+    }), 502
+
+candidates = result.get("candidates") or []
+parts = (
+    candidates[0].get("content", {}).get("parts", [])
+    if candidates else []
+)
+
+reply = parts[0].get("text") if parts else None
+
+if isinstance(reply, str) and reply.strip():
+    return jsonify({"reply": reply})
+
+app.logger.warning("Google API не вернул текст ответа")
+return jsonify({
+    "reply": "ИИ не смог ответить. Попробуй ещё раз."
+}), 502
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
