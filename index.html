@@ -1,362 +1,972 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NoglikTalk</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', Arial, sans-serif; }
-        body { background-color: #000000; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 14px; }
-        
-        /* Главный экран */
-        .header { padding: 20px 20px 10px; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { font-size: 22px; font-weight: 600; letter-spacing: 0.5px; color: #e0e0e0; }
-        .header .profile-btn { background-color: #1a1a1a; border: 1px solid #2a2a2a; color: #e0e0e0; width: 40px; height: 40px; border-radius: 50%; font-size: 16px; cursor: pointer; overflow: hidden; }
-        .header .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .search-bar { padding: 0 20px 15px; }
-        .search-bar input { width: 100%; padding: 12px 16px; border-radius: 4px; border: 1px solid #2a2a2a; background-color: #1a1a1a; color: #e0e0e0; outline: none; font-size: 14px; }
-        .search-bar input::placeholder { color: #6a6a6a; }
-
-        .main-content { flex: 1; overflow-y: auto; padding-bottom: 100px; }
-
-        .section { padding: 15px 20px; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .section-title { font-size: 16px; font-weight: 600; color: #e0e0e0; }
-        .section-more { font-size: 13px; color: #6a6a6a; cursor: pointer; }
-        .section-content { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 5px; }
-
-        .char-card { min-width: 100px; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .char-card .avatar { width: 80px; height: 80px; border-radius: 50%; overflow: hidden; border: 1px solid #4a4a4a; background-color: #1a1a1a; }
-        .char-card .avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .char-card .name { font-size: 13px; margin-top: 8px; color: #e0e0e0; text-align: center; }
-
-        /* Нижняя панель */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background-color: #0a0a0a; border-top: 1px solid #1a1a1a; display: flex; justify-content: space-around; align-items: center; z-index: 50; }
-        .nav-btn { background: none; border: none; color: #6a6a6a; font-size: 22px; cursor: pointer; flex: 1; height: 100%; display: flex; justify-content: center; align-items: center; }
-        .nav-btn.active { color: #e0e0e0; }
-        .nav-btn-center { background-color: #4a4a4a; color: #e0e0e0; width: 55px; height: 55px; border-radius: 50%; font-size: 28px; cursor: pointer; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
-        .nav-btn-center:active { background-color: #5a5a5a; }
-
-        /* Экран чатов */
-        #chats-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000000; z-index: 100; flex-direction: column; padding-bottom: 70px; }
-        #chats-screen.active { display: flex; }
-        .chat-list { flex: 1; overflow-y: auto; padding: 10px 0; }
-        .chat-item { display: flex; align-items: center; padding: 12px 20px; gap: 15px; cursor: pointer; border-bottom: 1px solid #1a1a1a; }
-        .chat-item:active { background-color: #1a1a1a; }
-        .chat-avatar { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 1px solid #4a4a4a; background-color: #1a1a1a; }
-        .chat-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .chat-info { flex: 1; min-width: 0; }
-        .chat-name { font-size: 15px; font-weight: 500; color: #e0e0e0; margin-bottom: 4px; }
-        .chat-last { font-size: 13px; color: #8e8e93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* Экран чата с персонажем */
-        #chat-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000000; z-index: 100; flex-direction: column; }
-        #chat-screen.active { display: flex; }
-        .chat-header { padding: 15px 20px; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; gap: 15px; background-color: #000000; }
-        .chat-header button { background: none; border: none; color: #e0e0e0; font-size: 20px; cursor: pointer; }
-        .chat-header .header-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 1px solid #4a4a4a; }
-        .chat-header .header-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .chat-header-info { flex: 1; }
-        #chat-name-header { font-weight: 500; font-size: 15px; color: #e0e0e0; }
-        .chat-status { font-size: 12px; color: #8e8e93; }
-        #messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background-color: #000000; }
-        .msg { padding: 12px 16px; border-radius: 4px; max-width: 80%; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
-        .msg.user { background-color: #1a1a1a; color: #e0e0e0; align-self: flex-end; }
-        .msg.bot { background-color: #2a2a2a; color: #e0e0e0; align-self: flex-start; }
-        .chat-input-panel { padding: 15px 20px; display: flex; gap: 10px; border-top: 1px solid #1a1a1a; background-color: #0a0a0a; }
-        #user-input { flex: 1; padding: 12px 16px; border-radius: 4px; border: 1px solid #2a2a2a; background-color: #1a1a1a; color: #e0e0e0; outline: none; font-size: 14px; }
-        #user-input::placeholder { color: #6a6a6a; }
-        #send-btn { background-color: #4a4a4a; color: #e0e0e0; border: none; border-radius: 4px; width: 44px; height: 44px; cursor: pointer; font-size: 16px; flex-shrink: 0; }
-
-        /* Экран создания */
-        #create-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000000; z-index: 100; flex-direction: column; }
-        #create-screen.active { display: flex; }
-        .create-form { padding: 20px; display: flex; flex-direction: column; gap: 15px; flex: 1; overflow-y: auto; }
-        .create-form input, .create-form textarea { padding: 12px 16px; border-radius: 4px; border: 1px solid #2a2a2a; background-color: #1a1a1a; color: #e0e0e0; outline: none; font-size: 14px; }
-        .create-form textarea { resize: none; height: 80px; }
-        .create-form input::placeholder, .create-form textarea::placeholder { color: #6a6a6a; }
-        .create-form button { padding: 14px; border-radius: 4px; border: none; background-color: #4a4a4a; color: #e0e0e0; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 10px; }
-        .avatar-upload { width: 90px; height: 90px; border-radius: 50%; border: 1px solid #4a4a4a; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px; color: #6a6a6a; font-size: 28px; cursor: pointer; background-color: #1a1a1a; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#071c16">
+<title>NoglikTalk — разговор начинается здесь</title>
+<style>
+:root {
+  --bg: #071c16;
+  --panel: #0d2920;
+  --panel2: #12352a;
+  --gold: #d9b66d;
+  --gold2: #f0d99b;
+  --text: #f5f2e9;
+  --muted: #a6b8ad;
+  --border: rgba(217,182,109,.23);
+  --danger: #f08e8e;
+}
+* { box-sizing: border-box; }
+[hidden] { display:none !important; }
+body {
+  margin:0; min-height:100vh; background:var(--bg); color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+button,input,textarea,select { font:inherit; }
+button { cursor:pointer; }
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible {
+  outline:2px solid var(--gold); outline-offset:3px;
+}
+button:disabled { opacity:.5; cursor:not-allowed; }
+button:focus:not(:focus-visible) { outline:none; }
+a { color:var(--gold2); }
+.muted { color:var(--muted); }
+.gold { color:var(--gold2); }
+.small { font-size:13px; }
+.brand { display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.4px; }
+.brand-mark {
+  display:grid;place-items:center;width:42px;height:42px;border:1px solid var(--gold);
+  color:var(--gold2);border-radius:14px;font-size:20px;
+  background:linear-gradient(145deg,#214b36,#0c2119);
+}
+.brand-name { font-size:19px; }
+.brand-sub { color:var(--muted);font-size:11px;font-weight:500;letter-spacing:1.5px;margin-top:3px; }
+.btn {
+  border:1px solid var(--border);background:var(--panel2);color:var(--text);
+  border-radius:12px;padding:11px 15px;transition:.18s;
+}
+.btn:hover { border-color:var(--gold);transform:translateY(-1px); }
+.btn.primary {
+  background:linear-gradient(135deg,#e8cb84,#c69c4c);
+  color:#152218;border-color:transparent;font-weight:800;
+}
+.btn.ghost { background:transparent; }
+.btn.danger { color:#ffc4c4;border-color:rgba(240,142,142,.4); }
+.input,.textarea,.select {
+  width:100%;background:#081e17;color:var(--text);
+  border:1px solid var(--border);border-radius:12px;padding:13px 14px;
+}
+.input::placeholder,.textarea::placeholder { color:#71877b; }
+.textarea { resize:vertical;min-height:100px; }
+.field { display:grid;gap:8px;margin:15px 0; }
+.field label { color:var(--muted);font-size:13px; }
+.app-header {
+  position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:16px;
+  justify-content:space-between;padding:13px 25px;background:rgba(7,28,22,.94);
+  border-bottom:1px solid var(--border);backdrop-filter:blur(18px);
+}
+.header-actions { display:flex;align-items:center;gap:9px; }
+.avatar-mini {
+  width:37px;height:37px;border-radius:50%;object-fit:cover;
+  border:1px solid var(--gold);
+}
+.layout { display:grid;grid-template-columns:220px minmax(0,1fr);min-height:calc(100vh - 68px); }
+.sidebar { padding:22px 15px;border-right:1px solid var(--border); }
+.nav { display:grid;gap:7px;position:sticky;top:90px; }
+.nav-btn {
+  text-align:left;padding:12px 13px;border-radius:11px;border:1px solid transparent;
+  background:transparent;color:var(--muted);
+}
+.nav-btn:hover,.nav-btn.active {
+  background:var(--panel);color:var(--gold2);border-color:var(--border);
+}
+.nav-label { color:#728b7e;font-size:10px;letter-spacing:1.8px;padding:17px 12px 5px; }
+.main { width:100%;max-width:1440px;margin:0 auto;padding:28px 30px 100px;min-width:0; }
+.hero {
+  position:relative;overflow:hidden;border:1px solid var(--border);border-radius:24px;
+  padding:36px;background:radial-gradient(ellipse at 90% 10%,#25543a 0,transparent 45%),
+  linear-gradient(120deg,#153b2b,#0b2119 65%);
+}
+.hero:after {
+  content:"✦";position:absolute;right:7%;top:12%;font-size:100px;
+  color:rgba(217,182,109,.15);pointer-events:none;
+}
+.eyebrow { color:var(--gold2);text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800; }
+.hero h1 { font-size:clamp(30px,4vw,48px);line-height:1.1;margin:13px 0;max-width:650px; }
+.hero p { color:#c0d0c5;max-width:560px;line-height:1.7; }
+.section-head { display:flex;justify-content:space-between;align-items:end;gap:12px;margin:32px 0 15px; }
+.section-head h2 { font-size:21px;margin:0; }
+.section-head p { color:var(--muted);font-size:13px;margin:6px 0 0; }
+.toolbar { display:flex;gap:10px;flex-wrap:wrap;margin:20px 0; }
+.toolbar .input { flex:1;min-width:180px; }
+.filters { display:flex;gap:8px;flex-wrap:wrap; }
+.filter {
+  border:1px solid var(--border);border-radius:999px;background:transparent;
+  color:var(--muted);padding:9px 14px;font-size:13px;
+}
+.filter.active { background:#254633;color:var(--gold2);border-color:var(--gold); }
+.character-grid {
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:17px;
+}
+.character-card {
+  min-width:0;overflow:hidden;border:1px solid var(--border);border-radius:18px;
+  background:linear-gradient(160deg,#123326,#0b2119);transition:.2s;
+}
+.character-card:hover { transform:translateY(-4px);border-color:var(--gold); }
+.character-image-wrap { aspect-ratio:1.15;background:#183a2a;position:relative;overflow:hidden; }
+.character-image { width:100%;height:100%;object-fit:cover;display:block; }
+.character-fallback {
+  display:grid;place-items:center;width:100%;height:100%;font-size:48px;color:var(--gold);
+  background:radial-gradient(circle,#31543a,#10281e);
+}
+.character-body { padding:15px; }
+.character-body h3 { margin:0 0 7px;font-size:17px; }
+.character-desc { color:var(--muted);font-size:12px;line-height:1.55;min-height:38px; }
+.character-meta { color:var(--gold2);font-size:11px;margin:12px 0; }
+.card-actions { display:flex;gap:7px; }
+.card-actions .btn { flex:1;padding:10px 8px;font-size:12px; }
+.empty { color:var(--muted);padding:24px 0; }
+.panel { background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:22px; }
+.screen-title { font-size:28px;margin:0 0 9px; }
+.screen-description { color:var(--muted);line-height:1.6;margin:0 0 24px; }
+.auth-screen {
+  min-height:100vh;display:grid;place-items:center;padding:22px;
+  background:radial-gradient(ellipse at 50% 0%,#204b34 0,transparent 52%),var(--bg);
+}
+.auth-card { width:100%;max-width:460px;border:1px solid var(--border);border-radius:24px;background:#0b241b;padding:30px; }
+.auth-card .brand { margin-bottom:35px; }
+.auth-card h1 { font-size:29px;margin:0 0 10px; }
+.auth-card p { color:var(--muted);line-height:1.65; }
+.notice { border:1px solid var(--border);background:#102e22;padding:12px;border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6; }
+.status { min-height:22px;font-size:13px;color:var(--muted);line-height:1.5; }
+.status.error { color:var(--danger); }
+.status.ok { color:#9cdbad; }
+.chat-layout { display:grid;grid-template-columns:minmax(0,1fr);gap:16px; }
+.chat-top { display:flex;align-items:center;gap:13px;padding-bottom:16px;border-bottom:1px solid var(--border); }
+.chat-avatar { width:54px;height:54px;border-radius:50%;object-fit:cover;border:1px solid var(--gold); }
+.chat-avatar-fallback { display:grid;place-items:center;width:54px;height:54px;border-radius:50%;background:#244932;font-size:24px; }
+.chat-top h2 { margin:0 0 4px;font-size:19px; }
+.chat-top p { margin:0;color:var(--muted);font-size:12px; }
+.messages {
+  display:flex;flex-direction:column;gap:15px;padding:22px 0;min-height:280px;
+  max-height:55vh;overflow-y:auto;scroll-behavior:smooth;
+}
+.message { max-width:85%;border:1px solid var(--border);border-radius:16px;padding:13px 15px;line-height:1.7;overflow-wrap:anywhere; }
+.message.user { align-self:flex-end;background:#254631;border-color:#426447; }
+.message.assistant { align-self:flex-start;background:#10271e; }
+.message-role { font-size:10px;letter-spacing:1px;color:var(--gold2);margin-bottom:7px;text-transform:uppercase; }
+.message-text { white-space:pre-wrap; }
+.typing { color:var(--muted);font-size:13px;padding:8px 0; }
+.composer { display:flex;align-items:end;gap:10px;border-top:1px solid var(--border);padding-top:16px; }
+.composer textarea { min-height:48px;max-height:160px;resize:vertical; }
+.composer .btn { min-height:48px; }
+.chat-hint { color:var(--muted);font-size:11px;margin-top:9px; }
+.history-list { display:grid;gap:10px; }
+.history-item {
+  display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--border);
+  border-radius:13px;background:var(--panel);min-width:0;
+}
+.history-item .history-info { flex:1;min-width:0; }
+.history-info strong { display:block; }
+.history-info p { margin:5px 0 0;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.form-grid { display:grid;grid-template-columns:1fr 1fr;gap:0 16px; }
+.bottom-nav { display:none; }
+.toast { position:fixed;z-index:30;bottom:22px;left:50%;transform:translateX(-50%);
+  background:#1d4430;border:1px solid var(--gold);padding:12px 17px;border-radius:12px;
+  box-shadow:0 10px 40px #0006;max-width:calc(100% - 30px);font-size:13px;
+}
+footer { text-align:center;color:#71877b;font-size:11px;padding:28px 0 5px; }
+@media(max-width:1050px) {
+  .character-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .layout { grid-template-columns:180px minmax(0,1fr); }
+  .main { padding:24px 20px 90px; }
+}
+@media(max-width:720px) {
+  .app-header { padding:11px 14px; }
+  .brand-name { font-size:17px; }
+  .brand-mark { width:37px;height:37px; }
+  .header-actions .desktop-only { display:none; }
+  .layout { display:block; }
+  .sidebar { display:none; }
+  .main { padding:17px 14px 95px; }
+  .hero { padding:25px 20px;border-radius:18px; }
+  .hero:after { font-size:65px;right:5%; }
+  .hero h1 { font-size:32px;max-width:85%; }
+  .character-grid { grid-template-columns:repeat(2,minmax(0,1fr));gap:11px; }
+  .character-body { padding:11px; }
+  .character-body h3 { font-size:15px; }
+  .character-desc { font-size:11px;min-height:49px; }
+  .card-actions .btn { padding:9px 5px;font-size:11px; }
+  .section-head { margin-top:26px; }
+  .section-head h2 { font-size:18px; }
+  .panel { padding:16px; }
+  .form-grid { grid-template-columns:1fr; }
+  .bottom-nav {
+    position:fixed;bottom:0;left:0;right:0;z-index:20;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:3px;padding:8px 7px calc(8px + env(safe-area-inset-bottom));
+    background:rgba(7,28,22,.97);border-top:1px solid var(--border);backdrop-filter:blur(15px);
+  }
+  .bottom-nav button { border:0;background:transparent;color:var(--muted);padding:8px 2px;font-size:10px;border-radius:9px; }
+  .bottom-nav button span { display:block;font-size:18px;margin-bottom:4px; }
+  .bottom-nav button.active { color:var(--gold2);background:#153728; }
+  .message { max-width:94%; }
+  .messages { max-height:52vh; }
+  .composer { gap:7px; }
+  .composer .btn { padding:10px; }
+  .toast { bottom:85px; }
+}
+</style>
 </head>
 <body>
 
-    <!-- ГЛАВНЫЙ ЭКРАН -->
-    <div id="main-screen">
-        <div class="header">
-            <h1>NoglikTalk</h1>
-            <button class="profile-btn" onclick="alert('Профиль скоро')">👤</button>
+<section id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="brand">
+      <div class="brand-mark">N</div>
+      <div><div class="brand-name">NoglikTalk</div><div class="brand-sub">ТВОЙ МИР ДИАЛОГОВ</div></div>
+    </div>
+    <div class="eyebrow">Добро пожаловать</div>
+    <h1>Специально для тебя</h1>
+    <p>Общайся с персонажами, открывай новые идеи и создавай собственных собеседников.</p>
+    <form id="authForm">
+      <div class="field">
+        <label for="userName">Как тебя называть?</label>
+        <input class="input" id="userName" maxlength="60" placeholder="Твоё имя или ник" autocomplete="nickname" required>
+      </div>
+      <div class="field">
+        <label for="apiKey">Gemini API-ключ</label>
+        <input class="input" id="apiKey" type="password" placeholder="Вставь свой API-ключ" autocomplete="off" required>
+      </div>
+      <button class="btn primary" type="submit" style="width:100%;margin:8px 0 15px">Погнали →</button>
+    </form>
+    <div id="authStatus" class="status" role="status"></div>
+    <div class="notice">Ключ используется для отправки запросов к Gemini. Не делись им с другими и не вставляй его в публичный код. Эта версия хранит ключ только в текущей вкладке браузера; после закрытия вкладки может потребоваться ввести его снова.</div>
+  </div>
+</section>
+
+<div id="app" hidden>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-mark">N</div>
+      <div><div class="brand-name">NoglikTalk</div><div class="brand-sub">ТВОЙ МИР ДИАЛОГОВ</div></div>
+    </div>
+    <div class="header-actions">
+      <span id="headerUser" class="muted small desktop-only"></span>
+      <button class="btn ghost" id="headerMenu">Меню</button>
+      <button class="btn ghost" id="logoutBtn">Выйти</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="nav">
+        <div class="nav-label">НАВИГАЦИЯ</div>
+        <button class="nav-btn active" data-screen="home">⌂ &nbsp; Главная</button>
+        <button class="nav-btn" data-screen="history">◷ &nbsp; История</button>
+        <button class="nav-btn" data-screen="create">＋ &nbsp; Создать персонажа</button>
+        <div class="nav-label">АККАУНТ</div>
+        <button class="nav-btn" data-screen="profile">⚙ &nbsp; Мой профиль</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <section id="homeScreen">
+        <div class="hero">
+          <div class="eyebrow">Территория твоих идей</div>
+          <h1 id="heroTitle">Специально для тебя</h1>
+          <p>Выбирай собеседника, начинай разговор и создавай персонажей с собственным характером. Твой следующий интересный диалог начинается здесь.</p>
+          <button class="btn primary" id="heroExplore">Выбрать персонажа →</button>
         </div>
 
-        <div class="search-bar">
-            <input type="text" placeholder="Найти персонажа...">
+        <div class="toolbar">
+          <input class="input" id="searchInput" type="search" placeholder="⌕  Найти персонажа..." aria-label="Поиск персонажей">
+        </div>
+        <div class="filters" id="filters">
+          <button class="filter active" data-filter="all">Все персонажи</button>
+          <button class="filter" data-filter="system">Системные персы</button>
+          <button class="filter" data-filter="popular">Популярные персы</button>
+          <button class="filter" data-filter="new">Новые персы</button>
         </div>
 
-        <div class="main-content">
-            <div class="section">
-                <div class="section-header">
-                    <span class="section-title">От автора</span>
-                    <span class="section-more">Все →</span>
-                </div>
-                <div class="section-content" id="section-author"></div>
+        <div class="section-head">
+          <div><h2 id="galleryTitle">Галерея персонажей</h2><p>Кого выберешь для следующего разговора?</p></div>
+          <span id="characterCount" class="muted small"></span>
+        </div>
+        <div id="characterGrid" class="character-grid"></div>
+        <div id="galleryEmpty" class="empty" hidden>Ничего не найдено. Попробуй другой запрос.</div>
+        <footer>NoglikTalk · Разговоры, которые начинаются с тебя</footer>
+      </section>
+
+      <section id="chatScreen" hidden>
+        <div class="panel chat-layout">
+          <div class="chat-top">
+            <button class="btn ghost" id="backHome" aria-label="Назад">←</button>
+            <img id="chatAvatar" class="chat-avatar" alt="" hidden>
+            <div id="chatAvatarFallback" class="chat-avatar-fallback">N</div>
+            <div style="flex:1;min-width:0">
+              <h2 id="chatName">Персонаж</h2>
+              <p id="chatSubtitle">Готов к разговору</p>
             </div>
+            <button class="btn ghost" id="clearChat">Новый диалог</button>
+          </div>
+          <div id="messages" class="messages" aria-live="polite"></div>
+          <div id="typing" class="typing" hidden>Персонаж формулирует ответ…</div>
+          <form id="composer" class="composer">
+            <textarea id="messageInput" class="textarea" maxlength="12000" rows="1" placeholder="Напиши сообщение..." aria-label="Сообщение"></textarea>
+            <button id="sendBtn" class="btn primary" type="submit">Отправить ↑</button>
+          </form>
+          <div class="chat-hint">Enter — отправить · Shift + Enter — новая строка</div>
+          <div id="chatStatus" class="status" role="status"></div>
+        </div>
+      </section>
 
-            <div class="section">
-                <div class="section-header">
-                    <span class="section-title">Популярные</span>
-                    <span class="section-more">Все →</span>
-                </div>
-                <div class="section-content" id="section-popular"></div>
+      <section id="historyScreen" hidden>
+        <h1 class="screen-title">История диалогов</h1>
+        <p class="screen-description">Твои последние разговоры на этом устройстве.</p>
+        <div id="historyList" class="history-list"></div>
+        <div id="historyEmpty" class="panel muted">Здесь появятся диалоги после первых сообщений.</div>
+        <button class="btn danger" id="clearHistory" style="margin-top:17px">Очистить историю</button>
+      </section>
+
+      <section id="createScreen" hidden>
+        <div class="panel">
+          <div class="eyebrow">Твоя идея — твой персонаж</div>
+          <h1 class="screen-title" style="margin-top:9px">Создать персонажа</h1>
+          <p class="screen-description">Опиши характер, манеру речи и правила общения. Персонаж появится в категории «Новые персы».</p>
+          <form id="createForm">
+            <div class="form-grid">
+              <div class="field">
+                <label for="newName">Имя персонажа *</label>
+                <input id="newName" class="input" maxlength="60" placeholder="Например, Профессор" required>
+              </div>
+              <div class="field">
+                <label for="newTagline">Краткое описание</label>
+                <input id="newTagline" class="input" maxlength="160" placeholder="Кто он и чем интересен?">
+              </div>
             </div>
-
-            <div class="section">
-                <div class="section-header">
-                    <span class="section-title">Рекомендации</span>
-                    <span class="section-more">Все →</span>
-                </div>
-                <div class="section-content" id="section-recommend"></div>
+            <div class="field">
+              <label for="newPrompt">Характер и системный промпт *</label>
+              <textarea id="newPrompt" class="textarea" maxlength="8000" rows="7" placeholder="Опиши личность, знания, манеру речи, стиль ответов и правила поведения..." required></textarea>
             </div>
-        </div>
-    </div>
-
-    <!-- НИЖНЯЯ ПАНЕЛЬ -->
-    <div class="bottom-nav">
-        <button class="nav-btn active" onclick="showMain()">🏠</button>
-        <button class="nav-btn-center" onclick="showCreate()">+</button>
-        <button class="nav-btn" onclick="showChats()">💬</button>
-    </div>
-
-    <!-- ЭКРАН ЧАТОВ -->
-    <div id="chats-screen">
-        <div class="chat-header">
-            <button onclick="showMain()">←</button>
-            <span style="font-weight: 500;">Чаты</span>
-        </div>
-        <div class="chat-list" id="chat-list"></div>
-    </div>
-
-    <!-- ЭКРАН ЧАТА С ПЕРСОНАЖЕМ -->
-    <div id="chat-screen">
-        <div class="chat-header">
-            <button onclick="hideChat()">←</button>
-            <div class="header-avatar" id="header-avatar"></div>
-            <div class="chat-header-info">
-                <div id="chat-name-header"></div>
-                <div class="chat-status">В сети</div>
+            <div class="field">
+              <label for="newAvatar">Аватар (необязательно)</label>
+              <input id="newAvatar" class="input" type="file" accept="image/png,image/jpeg,image/webp">
+              <span class="muted small">Лучше использовать небольшую картинку. Изображение будет сохранено в браузере этого устройства.</span>
             </div>
+            <div class="status" id="createStatus" role="status"></div>
+            <button class="btn primary" type="submit">Создать персонажа</button>
+          </form>
         </div>
-        <div id="messages"></div>
-        <div class="chat-input-panel">
-            <input id="user-input" type="text" placeholder="Напиши...">
-            <button id="send-btn" onclick="sendMessage()">➤</button>
-        </div>
-    </div>
+      </section>
 
-    <!-- ЭКРАН СОЗДАНИЯ -->
-    <div id="create-screen">
-        <div class="chat-header">
-            <button onclick="hideCreate()">←</button>
-            <span>Новый персонаж</span>
+      <section id="profileScreen" hidden>
+        <div class="panel">
+          <h1 class="screen-title">Мой профиль</h1>
+          <p class="screen-description">Настройки текущего сеанса.</p>
+          <div class="field">
+            <label for="profileName">Имя</label>
+            <input id="profileName" class="input" maxlength="60">
+          </div>
+          <div class="field">
+            <label for="profileKey">Gemini API-ключ (только текущая вкладка)</label>
+            <input id="profileKey" class="input" type="password" autocomplete="off">
+          </div>
+          <button class="btn primary" id="saveProfile">Сохранить</button>
+          <button class="btn ghost" id="showKey" style="margin-left:7px">Показать / скрыть ключ</button>
+          <div id="profileStatus" class="status" role="status" style="margin-top:12px"></div>
+          <div class="notice" style="margin-top:18px">Созданные персонажи и история хранятся в локальном хранилище браузера. Они не синхронизируются между устройствами и могут исчезнуть при очистке данных сайта.</div>
         </div>
-        <div class="create-form">
-            <div class="avatar-upload">📷</div>
-            <input id="new-name" type="text" placeholder="Имя персонажа">
-            <input id="new-greeting" type="text" placeholder="Приветствие">
-            <textarea id="new-character" placeholder="Краткое описание (кто это)"></textarea>
-            <textarea id="new-style" placeholder="Характер"></textarea>
-            <textarea id="new-style2" placeholder="Стиль общения"></textarea>
-            <button onclick="createCharacter()">Создать</button>
-        </div>
-    </div>
- <script>
-   const SYSTEM_CHARS = [
-    { name: "Сократ", avatar: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_00000000356881f48a43afc0e32e8bb1.png", description: "Древнегреческий философ", greeting: "ПРИВЕТ, Я СОКРАТ. СПРАШИВАЙ.", personaId: "socrat" },
-    { name: "Пушкин", avatar: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000061f4820abb3f3b2e616bda30.png", description: "Поэт, говорит рифмами", greeting: "Приветствую, мой друг! Я Пушкин, поэт.", personaId: "pushkin" },
-    { name: "Сталин", avatar: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000056ac81f4b9167adb3b61206f.png", description: "Строгий, холодный", greeting: "Здравствуй. Говори по делу.", personaId: "stalin" },
-    { name: "Братюня", avatar: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000026308210bd3e70e4c1c72dc3.png", description: "Лучший друг", greeting: "Здарова, братан! Как сам?", personaId: "bratunya" },
-    { name: "Та самая", avatar: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000030a48211ad9240c36185feb6.png", description: "13 лет, блондинка, просит помочь", greeting: "Привет! Помоги с физикой!", personaId: "ta_samaya" },
-    { name: "Обычный ИИ", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AI&backgroundColor=1a1a1a", description: "Помощник на все случаи", greeting: "Здравствуйте! Чем помочь?", personaId: "default" }
+      </section>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Мобильная навигация">
+    <button class="active" data-screen="home"><span>⌂</span>Главная</button>
+    <button data-screen="history"><span>◷</span>История</button>
+    <button data-screen="create"><span>＋</span>Создать</button>
+    <button data-screen="profile"><span>⚙</span>Меню</button>
+  </nav>
+</div>
+
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script>
+"use strict";
+
+/*
+ * API contract for server.py:
+ * POST /chat
+ * {
+ *   api_key, message, character_id, history,
+ *   character_name?, system_prompt?
+ * }
+ * Expected response: { success: true, reply: "..." }
+ */
+
+const AVATARS = {
+  socrat: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_00000000356881f48a43afc0e32e8bb1.PNG",
+  bratunya: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000030a48211ad9240c36185feb6.PNG",
+  stalin: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000026308210bd3e70e4c1c72dc3.PNG",
+  pushkin: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000056ac81f4b9167adb3b61206f.PNG",
+  ta_samaya: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000061f4820abb3f3b2e616bda30.png"
+};
+
+const DEFAULT_CHARACTERS = [
+  { id:"socrat", name:"Сократ", category:"system", tagline:"Философ, который помогает находить ответы через вопросы.", avatar:AVATARS.socrat },
+  { id:"bratunya", name:"Братан", category:"popular", tagline:"Энергичный собеседник, помощник и напарник по идеям.", avatar:AVATARS.bratunya },
+  { id:"stalin", name:"Сталин", category:"popular", tagline:"Историческая ролевая интерпретация и разговоры об эпохе СССР.", avatar:AVATARS.stalin },
+  { id:"pushkin", name:"Пушкин", category:"popular", tagline:"Литература, ирония, история и искусство слова.", avatar:AVATARS.pushkin },
+  { id:"ta_samaya", name:"Та самая", category:"popular", tagline:"Живая беседа о повседневной жизни, интересах и идеях.", avatar:AVATARS.ta_samaya }
 ];
 
-let userChars = JSON.parse(localStorage.getItem("noglik_user_characters")) || [];
-let characters = [...SYSTEM_CHARS, ...userChars];
+const STORAGE = {
+  characters: "nogliktalk_characters_v1",
+  history: "nogliktalk_history_v1",
+  name: "nogliktalk_name_v1"
+};
 
-        let currentChar = null;
+const $ = id => document.getElementById(id);
 
-function saveCharacters() {
-  const customCharacters = characters.filter(char => {
-    if (!char) return false;
-    const id = char.personaId;
-    return typeof id === 'string' && id.startsWith('custom_');
+let apiKey = "";
+let userName = "";
+let characters = [];
+let historyItems = [];
+let activeFilter = "all";
+let activeCharacter = null;
+let activeMessages = [];
+let currentConversationId = null;
+let sending = false;
+let toastTimer = null;
+
+function safeRead(key, fallback) {
+  try {
+    const value = localStorage.getItem(key);
+    return value === null ? fallback : JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+function safeWrite(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    showToast("Не удалось сохранить данные. Возможно, хранилище браузера заполнено.");
+    return false;
+  }
+}
+function makeId() {
+  return (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+}
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  })[ch]);
+}
+function showToast(message) {
+  const toast = $("toast");
+  toast.textContent = message;
+  toast.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.hidden = true; }, 3200);
+}
+function setStatus(id, message, type="") {
+  const el = $(id);
+  el.textContent = message;
+  el.className = "status" + (type ? " " + type : "");
+}
+function getCharacter(id) {
+  return characters.find(c => c.id === id);
+}
+function persistCharacters() {
+  return safeWrite(STORAGE.characters, characters);
+}
+function persistHistory() {
+  return safeWrite(STORAGE.history, historyItems);
+}
+function loadLocalData() {
+  const storedCharacters = safeRead(STORAGE.characters, null);
+  characters = Array.isArray(storedCharacters)
+    ? storedCharacters.filter(c => c && typeof c.id === "string" && typeof c.name === "string")
+    : [];
+
+  // Refresh built-in character metadata with the current avatar URLs.
+  characters = characters.filter(c => !DEFAULT_CHARACTERS.some(d => d.id === c.id));
+  characters = DEFAULT_CHARACTERS.map(d => ({...d})).concat(characters);
+
+  const storedHistory = safeRead(STORAGE.history, []);
+  historyItems = Array.isArray(storedHistory) ? storedHistory : [];
+  persistCharacters();
+}
+function showApp() {
+  $("authScreen").hidden = true;
+  $("app").hidden = false;
+  $("headerUser").textContent = userName ? "Привет, " + userName : "";
+  $("heroTitle").textContent = userName ? "Специально для тебя, " + userName : "Специально для тебя";
+  $("profileName").value = userName;
+  $("profileKey").value = apiKey;
+  renderCharacters();
+  showScreen("home");
+}
+function logout() {
+  apiKey = "";
+  sessionStorage.removeItem("nogliktalk_api_key");
+  $("app").hidden = true;
+  $("authScreen").hidden = false;
+  $("apiKey").value = "";
+  setStatus("authStatus", "Ты вышел из текущего сеанса.");
+}
+function showScreen(name) {
+  const screens = {
+    home:"homeScreen", chat:"chatScreen", history:"historyScreen",
+    create:"createScreen", profile:"profileScreen"
+  };
+  Object.entries(screens).forEach(([key,id]) => { $(id).hidden = key !== name; });
+  document.querySelectorAll("[data-screen]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.screen === name);
+  });
+  if (name === "history") renderHistory();
+  if (name === "home") renderCharacters();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function makeAvatarElement(character, className) {
+  if (character.avatar) {
+    const img = document.createElement("img");
+    img.className = className;
+    img.src = character.avatar;
+    img.alt = character.name;
+    img.loading = "lazy";
+    img.referrerPolicy = "no-referrer";
+    img.onerror = () => {
+      const fallback = document.createElement("div");
+      fallback.className = "character-fallback";
+      fallback.textContent = "✦";
+      img.replaceWith(fallback);
+    };
+    return img;
+  }
+  const fallback = document.createElement("div");
+  fallback.className = "character-fallback";
+  fallback.textContent = "✦";
+  return fallback;
+}
+function renderCharacters() {
+  const query = $("searchInput").value.trim().toLocaleLowerCase("ru");
+  const filtered = characters.filter(c => {
+    const category = c.category || "new";
+    const matchesFilter = activeFilter === "all" ||
+      (activeFilter === "new" ? category === "new" : category === activeFilter);
+    const matchesQuery = (c.name + " " + (c.tagline || "")).toLocaleLowerCase("ru").includes(query);
+    return matchesFilter && matchesQuery;
   });
 
-  localStorage.setItem(
-    'noglik_user_characters',
-    JSON.stringify(customCharacters)
-  );
+  const grid = $("characterGrid");
+  grid.replaceChildren();
+  $("characterCount").textContent = filtered.length + " персонаж(а)";
+  $("galleryEmpty").hidden = filtered.length > 0;
+
+  filtered.forEach(character => {
+    const card = document.createElement("article");
+    card.className = "character-card";
+
+    const imageWrap = document.createElement("div");
+    imageWrap.className = "character-image-wrap";
+    imageWrap.appendChild(makeAvatarElement(character, "character-image"));
+
+    const body = document.createElement("div");
+    body.className = "character-body";
+
+    const title = document.createElement("h3");
+    title.textContent = character.name;
+
+    const desc = document.createElement("div");
+    desc.className = "character-desc";
+    desc.textContent = character.tagline || "Новый собеседник NoglikTalk.";
+
+    const meta = document.createElement("div");
+    meta.className = "character-meta";
+    meta.textContent = character.category === "system" ? "СИСТЕМНЫЙ ПЕРСОНАЖ" :
+      character.category === "new" ? "НОВЫЙ ПЕРСОНАЖ" : "ПОПУЛЯРНЫЙ ПЕРСОНАЖ";
+
+    const actions = document.createElement("div");
+    actions.className = "card-actions";
+
+    const chatBtn = document.createElement("button");
+    chatBtn.className = "btn primary";
+    chatBtn.textContent = "Общаться";
+    chatBtn.addEventListener("click", () => openChat(character.id));
+
+    actions.append(chatBtn);
+    if (character.category === "new") {
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "btn ghost";
+      deleteBtn.textContent = "Удалить";
+      deleteBtn.addEventListener("click", () => deleteCharacter(character.id));
+      actions.append(deleteBtn);
+    }
+
+    body.append(title, desc, meta, actions);
+    card.append(imageWrap, body);
+    grid.append(card);
+  });
+}
+function deleteCharacter(id) {
+  const character = getCharacter(id);
+  if (!character || character.category !== "new") return;
+  if (!confirm("Удалить персонажа «" + character.name + "»?")) return;
+  characters = characters.filter(c => c.id !== id);
+  persistCharacters();
+  renderCharacters();
+  showToast("Персонаж удалён.");
+}
+function openChat(characterId, conversationId=null) {
+  const character = getCharacter(characterId);
+  if (!character) {
+    showToast("Персонаж не найден.");
+    return;
+  }
+  activeCharacter = character;
+  currentConversationId = conversationId || makeId();
+  activeMessages = [];
+  const previous = conversationId ? historyItems.find(h => h.id === conversationId) : null;
+  if (previous && Array.isArray(previous.messages)) {
+    activeMessages = previous.messages.map(m => ({role:m.role,content:m.content}));
+  }
+
+  $("chatName").textContent = character.name;
+  $("chatSubtitle").textContent = character.tagline || "Готов к разговору";
+  $("chatAvatar").hidden = true;
+  $("chatAvatarFallback").hidden = false;
+  $("chatAvatarFallback").textContent = "✦";
+  if (character.avatar) {
+    $("chatAvatar").src = character.avatar;
+    $("chatAvatar").alt = character.name;
+    $("chatAvatar").onerror = () => {
+      $("chatAvatar").hidden = true;
+      $("chatAvatarFallback").hidden = false;
+    };
+    $("chatAvatar").onload = () => {
+      $("chatAvatar").hidden = false;
+      $("chatAvatarFallback").hidden = true;
+    };
+  }
+  renderMessages();
+  setStatus("chatStatus", "");
+  showScreen("chat");
+  $("messageInput").focus();
+}
+function renderMessages() {
+  const container = $("messages");
+  container.replaceChildren();
+
+  if (!activeMessages.length) {
+    const welcome = document.createElement("div");
+    welcome.className = "message assistant";
+    const role = document.createElement("div");
+    role.className = "message-role";
+    role.textContent = activeCharacter ? activeCharacter.name : "NoglikTalk";
+    const text = document.createElement("div");
+    text.className = "message-text";
+    text.textContent = "Привет! Начни разговор — я готов к общению.";
+    welcome.append(role,text);
+    container.append(welcome);
+  } else {
+    activeMessages.forEach(m => {
+      const bubble = document.createElement("div");
+      bubble.className = "message " + (m.role === "user" ? "user" : "assistant");
+      const role = document.createElement("div");
+      role.className = "message-role";
+      role.textContent = m.role === "user" ? (userName || "Ты") : activeCharacter.name;
+      const text = document.createElement("div");
+      text.className = "message-text";
+      text.textContent = m.content;
+      bubble.append(role,text);
+      container.append(bubble);
+    });
+  }
+  container.scrollTop = container.scrollHeight;
+}
+function saveConversation() {
+  if (!activeCharacter || !activeMessages.length) return;
+  const firstUser = activeMessages.find(m => m.role === "user");
+  const entry = {
+    id: currentConversationId,
+    characterId: activeCharacter.id,
+    characterName: activeCharacter.name,
+    avatar: activeCharacter.avatar || "",
+    title: firstUser ? firstUser.content.slice(0,70) : "Новый диалог",
+    updatedAt: Date.now(),
+    messages: activeMessages.slice(-40)
+  };
+  const index = historyItems.findIndex(h => h.id === currentConversationId);
+  if (index >= 0) historyItems[index] = entry;
+  else historyItems.unshift(entry);
+  historyItems.sort((a,b) => b.updatedAt - a.updatedAt);
+  historyItems = historyItems.slice(0,60);
+  persistHistory();
+}
+function renderHistory() {
+  const list = $("historyList");
+  list.replaceChildren();
+  $("historyEmpty").hidden = historyItems.length > 0;
+
+  historyItems.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "history-item";
+    const character = getCharacter(item.characterId) || {
+      id:item.characterId, name:item.characterName || "Персонаж", avatar:item.avatar || ""
+    };
+    const avatar = makeAvatarElement(character, "avatar-mini");
+    const info = document.createElement("div");
+    info.className = "history-info";
+    const title = document.createElement("strong");
+    title.textContent = item.characterName || character.name;
+    const preview = document.createElement("p");
+    preview.textContent = item.title || "Диалог";
+    const date = document.createElement("p");
+    date.textContent = new Date(item.updatedAt || Date.now()).toLocaleString("ru-RU");
+    info.append(title,preview,date);
+    const openBtn = document.createElement("button");
+    openBtn.className = "btn";
+    openBtn.textContent = "Открыть";
+    openBtn.addEventListener("click", () => openChat(item.characterId, item.id));
+    row.append(avatar,info,openBtn);
+    list.append(row);
+  });
+}
+function buildApiHistory(messages) {
+  // Send a bounded portion of the conversation to the backend.
+  return messages.slice(-20).map(m => ({
+    role: m.role === "assistant" ? "model" : "user",
+    content: String(m.content).slice(0,12000)
+  }));
+}
+async function sendMessage(message) {
+  if (sending) return;
+  if (!activeCharacter) return;
+  if (!apiKey) {
+    setStatus("chatStatus", "Нет API-ключа. Выйди и введи ключ заново.", "error");
+    return;
+  }
+
+  message = message.trim();
+  if (!message) return;
+
+  sending = true;
+  $("sendBtn").disabled = true;
+  $("messageInput").disabled = true;
+  setStatus("chatStatus", "");
+  activeMessages.push({role:"user",content:message});
+  renderMessages();
+  $("typing").hidden = false;
+
+  try {
+    const payload = {
+      api_key: apiKey,
+      message,
+      character_id: activeCharacter.id,
+      history: buildApiHistory(activeMessages.slice(0,-1))
+    };
+
+    // Custom characters pass their prompt to the backend.
+    if (activeCharacter.category === "new") {
+      payload.character_name = activeCharacter.name;
+      payload.system_prompt = activeCharacter.prompt;
+    }
+
+    const response = await fetch("/chat", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
+    });
+
+    let data;
+    try { data = await response.json(); }
+    catch { throw new Error("Сервер вернул не JSON. Проверь деплой и адрес API."); }
+
+    if (!response.ok || data.success === false) {
+      throw new Error(data.error || "Ошибка сервера: " + response.status);
+    }
+
+    const reply = data.reply || data.response || data.message;
+    if (typeof reply !== "string" || !reply.trim()) {
+      throw new Error("Сервер не вернул текст ответа.");
+    }
+
+    activeMessages.push({role:"assistant",content:reply.trim()});
+    saveConversation();
+    renderMessages();
+  } catch (error) {
+    const msg = error && error.message ? error.message : "Не удалось отправить сообщение.";
+    setStatus("chatStatus", msg, "error");
+    // Preserve the user's message but allow retrying it manually.
+    renderMessages();
+  } finally {
+    sending = false;
+    $("typing").hidden = true;
+    $("sendBtn").disabled = false;
+    $("messageInput").disabled = false;
+    $("messageInput").focus();
+  }
 }
 
+$("authForm").addEventListener("submit", event => {
+  event.preventDefault();
+  const name = $("userName").value.trim();
+  const key = $("apiKey").value.trim();
+  if (!name) return setStatus("authStatus","Введи имя или ник.","error");
+  if (!key) return setStatus("authStatus","Введи Gemini API-ключ.","error");
+  if (/\s/.test(key)) return setStatus("authStatus","Проверь формат API-ключа.","error");
 
-        function renderSections() {
-    const author = document.getElementById("section-author");
-    const popular = document.getElementById("section-popular");
-    const recommend = document.getElementById("section-recommend");
+  userName = name.slice(0,60);
+  apiKey = key;
+  try { sessionStorage.setItem("nogliktalk_api_key",apiKey); }
+  catch { /* key remains in memory for this page */ }
+  safeWrite(STORAGE.name,userName);
+  loadLocalData();
+  showApp();
+});
 
-    author.innerHTML = "";
-    popular.innerHTML = "";
-    recommend.innerHTML = "";
+$("logoutBtn").addEventListener("click", () => {
+  if (confirm("Выйти из текущего сеанса?")) logout();
+});
+$("headerMenu").addEventListener("click", () => showScreen("profile"));
+$("heroExplore").addEventListener("click", () => {
+  $("characterGrid").scrollIntoView({behavior:"smooth",block:"start"});
+});
+$("backHome").addEventListener("click", () => showScreen("home"));
+$("searchInput").addEventListener("input", renderCharacters);
 
-    characters.forEach((char, index) => {
-        function createCard() {
-            const card = document.createElement("div");
-            card.className = "char-card";
+$("filters").addEventListener("click", event => {
+  const button = event.target.closest("[data-filter]");
+  if (!button) return;
+  activeFilter = button.dataset.filter;
+  document.querySelectorAll("[data-filter]").forEach(b => b.classList.toggle("active",b === button));
+  renderCharacters();
+});
 
-            card.onclick = () => openChat(index);
+document.querySelectorAll("[data-screen]").forEach(button => {
+  button.addEventListener("click", () => showScreen(button.dataset.screen));
+});
 
-            const avatar = document.createElement("div");
-            avatar.className = "avatar";
+$("composer").addEventListener("submit", event => {
+  event.preventDefault();
+  const input = $("messageInput");
+  const message = input.value;
+  if (!message.trim() || sending) return;
+  input.value = "";
+  sendMessage(message);
+});
+$("messageInput").addEventListener("keydown", event => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    $("composer").requestSubmit();
+  }
+});
+$("clearChat").addEventListener("click", () => {
+  if (!activeCharacter) return;
+  if (activeMessages.length && !confirm("Начать новый диалог? Текущий диалог останется в истории.")) return;
+  saveConversation();
+  openChat(activeCharacter.id);
+});
+$("clearHistory").addEventListener("click", () => {
+  if (!historyItems.length) return;
+  if (!confirm("Удалить всю историю диалогов на этом устройстве?")) return;
+  historyItems = [];
+  persistHistory();
+  renderHistory();
+});
+$("createForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  setStatus("createStatus","");
+  const name = $("newName").value.trim();
+  const tagline = $("newTagline").value.trim();
+  const prompt = $("newPrompt").value.trim();
+  const file = $("newAvatar").files[0];
 
-            const img
+  if (!name || !prompt) return setStatus("createStatus","Заполни имя и описание характера.","error");
+  if (prompt.length < 20) return setStatus("createStatus","Добавь немного больше информации о характере.","error");
 
+  let avatar = "";
+  if (file) {
+    if (!["image/png","image/jpeg","image/webp"].includes(file.type)) {
+      return setStatus("createStatus","Используй PNG, JPEG или WebP.","error");
+    }
+    if (file.size > 1024 * 1024) {
+      return setStatus("createStatus","Изображение должно быть меньше 1 МБ.","error");
+    }
+    try {
+      avatar = await new Promise((resolve,reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Не удалось прочитать изображение."));
+        reader.readAsDataURL(file);
+      });
+    } catch {
+      return setStatus("createStatus","Не удалось загрузить изображение.","error");
+    }
+  }
 
-        function renderChatList() {
-            const list = document.getElementById("chat-list");
-            list.innerHTML = "";
-            characters.forEach((char, index) => {
-                const item = document.createElement("div");
-                item.className = "chat-item";
-                item.onclick = () => openChat(index);
-                const history = JSON.parse(localStorage.getItem("noglik_chat_" + char.name)) || [];
-                const lastMsg = history.length > 0 ? history[history.length - 1].text : char.description;
-                item.innerHTML = `
-                    <div class="chat-avatar"><img src="${char.avatar}"></div>
-                    <div class="chat-info">
-                        <div class="chat-name">${char.name}</div>
-                        <div class="chat-last">${lastMsg}</div>
-                    </div>
-                `;
-                list.appendChild(item);
-            });
-        }
+  const character = {
+    id:"custom_" + makeId(),
+    name:name.slice(0,60),
+    tagline:tagline.slice(0,160) || "Персонаж, созданный пользователем.",
+    category:"new",
+    prompt:prompt.slice(0,8000),
+    avatar
+  };
+  characters.push(character);
+  if (!persistCharacters()) {
+    characters = characters.filter(c => c.id !== character.id);
+    return setStatus("createStatus","Не удалось сохранить персонажа. Освободи место в хранилище браузера.","error");
+  }
 
-        function showMain() {
-            document.getElementById("chats-screen").classList.remove("active");
-            document.getElementById("chat-screen").classList.remove("active");
-            document.getElementById("create-screen").classList.remove("active");
-            document.getElementById("main-screen").style.display = "block";
-        }
+  $("createForm").reset();
+  activeFilter = "new";
+  document.querySelectorAll("[data-filter]").forEach(b => b.classList.toggle("active",b.dataset.filter === "new"));
+  $("searchInput").value = "";
+  showScreen("home");
+  showToast("Персонаж «" + character.name + "» создан!");
+});
 
-        function showChats() {
-            document.getElementById("main-screen").style.display = "none";
-            document.getElementById("chats-screen").classList.add("active");
-            renderChatList();
-        }
+$("saveProfile").addEventListener("click", () => {
+  const name = $("profileName").value.trim();
+  const key = $("profileKey").value.trim();
+  if (!name) return setStatus("profileStatus","Имя не должно быть пустым.","error");
+  if (!key) return setStatus("profileStatus","Введи API-ключ.","error");
+  if (/\s/.test(key)) return setStatus("profileStatus","Проверь формат API-ключа.","error");
 
-        function openChat(index) {
-            currentChar = characters[index];
-            document.getElementById("chat-name-header").textContent = currentChar.name;
-            document.getElementById("header-avatar").innerHTML = `<img src="${currentChar.avatar}">`;
-            document.getElementById("messages").innerHTML = "";
-            loadHistory(currentChar.name);
-            document.getElementById("main-screen").style.display = "none";
-            document.getElementById("chats-screen").classList.remove("active");
-            document.getElementById("chat-screen").classList.add("active");
-        }
+  userName = name.slice(0,60);
+  apiKey = key;
+  try { sessionStorage.setItem("nogliktalk_api_key",apiKey); }
+  catch {}
+  safeWrite(STORAGE.name,userName);
+  $("headerUser").textContent = "Привет, " + userName;
+  $("heroTitle").textContent = "Специально для тебя, " + userName;
+  setStatus("profileStatus","Настройки сохранены для текущего сеанса.","ok");
+});
+$("showKey").addEventListener("click", () => {
+  $("profileKey").type = $("profileKey").type === "password" ? "text" : "password";
+});
 
-        function hideChat() {
-            document.getElementById("chat-screen").classList.remove("active");
-            document.getElementById("main-screen").style.display = "block";
-            currentChar = null;
-        }
+function initialize() {
+  try { apiKey = sessionStorage.getItem("nogliktalk_api_key") || ""; }
+  catch { apiKey = ""; }
 
-        function getHistoryKey(name) { return "noglik_chat_" + name; }
+  const savedName = safeRead(STORAGE.name,"");
+  userName = typeof savedName === "string" ? savedName : "";
+  loadLocalData();
 
-        function loadHistory(name) {
-            const history = JSON.parse(localStorage.getItem(getHistoryKey(name))) || [];
-            const char = characters.find(c => c.name === name);
-            if (history.length === 0) {
-                addMessage(char.greeting, "bot");
-                saveHistory(name, [{ text: char.greeting, sender: "bot" }]);
-            } else {
-                history.forEach(m => addMessage(m.text, m.sender));
-            }
-        }
-
-        function saveHistory(name, history) { localStorage.setItem(getHistoryKey(name), JSON.stringify(history)); }
-
-        function addMessage(text, sender) {
-            const messages = document.getElementById("messages");
-            const msg = document.createElement("div");
-            msg.className = "msg " + sender;
-            msg.textContent = text;
-            messages.appendChild(msg);
-            messages.scrollTop = messages.scrollHeight;
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById("user-input");
-            const text = input.value.trim();
-            if (!text || !currentChar) return;
-            addMessage(text, "user");
-            const history = JSON.parse(localStorage.getItem(getHistoryKey(currentChar.name))) || [];
-            history.push({ text: text, sender: "user" });
-            saveHistory(currentChar.name, history);
-            input.value = "";
-            try {
-                const response = await fetch("/chat", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: text, persona: currentChar.personaId })
-                });
-                const data = await response.json();
-                const reply = data.reply || "Нет ответа";
-                addMessage(reply, "bot");
-                history.push({ text: reply, sender: "bot" });
-                saveHistory(currentChar.name, history);
-            } catch (e) {
-                addMessage("Сервер не отвечает. Запусти python server.py", "bot");
-            }
-        }
-
-        function showCreate() {
-            document.getElementById("main-screen").style.display = "none";
-            document.getElementById("create-screen").classList.add("active");
-        }
-
-        function hideCreate() {
-            document.getElementById("create-screen").classList.remove("active");
-            document.getElementById("main-screen").style.display = "block";
-        }
-
-        function createCharacter() {
-            const nameVal = document.getElementById("new-name").value.trim();
-            const greetingVal = document.getElementById("new-greeting").value.trim();
-            const characterVal = document.getElementById("new-character").value.trim();
-            if (!nameVal || !greetingVal) { alert("Имя и приветствие обязательны!"); return; }
-            const newChar = {
-                name: nameVal,
-                avatar: "https://ui-avatars.com/api/?name=" + encodeURIComponent(nameVal) + "&background=1a1a1a&color=e0e0e0&size=200",
-                description: characterVal || "Мой персонаж",
-                greeting: greetingVal,
-                personaId: "custom_" + Date.now()
-            };
-            characters.push(newChar);
-            saveCharacters();
-            hideCreate();
-            renderSections();
-            renderChatList();
-            document.getElementById("new-name").value = "";
-            document.getElementById("new-greeting").value = "";
-            document.getElementById("new-character").value = "";
-        }
-
-        document.getElementById("user-input").addEventListener("keypress", (e) => {
-            if (e.key === "Enter") sendMessage();
-        });
-
-        renderSections();
-    </script>
-
+  if (apiKey && userName) {
+    showApp();
+  } else {
+    $("authScreen").hidden = false;
+    $("app").hidden = true;
+    $("userName").value = userName;
+  }
+}
+initialize();
+</script>
 </body>
-</html>
+</
