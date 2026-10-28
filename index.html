@@ -59,6 +59,8 @@ a { color:var(--gold2); }
 }
 .input::placeholder,.textarea::placeholder { color:#71877b; }
 .textarea { resize:vertical;min-height:100px; }
+.input-row { display: flex; gap: 8px; }
+.input-row .input { flex: 1; min-width: 0; }
 .field { display:grid;gap:8px;margin:15px 0; }
 .field label { color:var(--muted);font-size:13px; }
 .app-header {
@@ -235,8 +237,41 @@ footer { text-align:center;color:#71877b;font-size:11px;padding:28px 0 5px; }
         <input class="input" id="userName" maxlength="60" placeholder="Твоё имя или ник" autocomplete="nickname" required>
       </div>
       <div class="field">
+        <label for="registerAvatar">Твоя аватарка (необязательно)</label>
+        <input
+          class="input"
+          id="registerAvatar"
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+        >
+        <img
+          id="registerAvatarPreview"
+          alt="Предпросмотр аватарки"
+          hidden
+          style="width:88px;height:88px;border-radius:50%;object-fit:cover;border:1px solid var(--gold)"
+        >
+        <span class="muted small">
+          Выбери изображение из галереи телефона или файлов компьютера.
+        </span>
+      </div>
+      <div class="field">
         <label for="apiKey">Gemini API-ключ</label>
-        <input class="input" id="apiKey" type="password" placeholder="Вставь свой API-ключ" autocomplete="off" required>
+        <div class="input-row">
+          <input
+            class="input"
+            id="apiKey"
+            type="password"
+            placeholder="Вставь свой API-ключ"
+            autocomplete="off"
+            required
+          >
+          <button
+            class="btn"
+            type="button"
+            data-toggle-password="apiKey"
+            aria-label="Показать или скрыть API-ключ"
+          >👁</button>
+        </div>
       </div>
       <button class="btn primary" type="submit" style="width:100%;margin:8px 0 15px">Погнали →</button>
     </form>
@@ -252,6 +287,8 @@ footer { text-align:center;color:#71877b;font-size:11px;padding:28px 0 5px; }
       <div><div class="brand-name">NoglikTalk</div><div class="brand-sub">ТВОЙ МИР ДИАЛОГОВ</div></div>
     </div>
     <div class="header-actions">
+      <img id="headerAvatar" class="avatar-mini" alt="Твоя аватарка" hidden>
+      <div id="headerAvatarFallback" class="brand-mark" style="width:37px;height:37px;font-size:16px">N</div>
       <span id="headerUser" class="muted small desktop-only"></span>
       <button class="btn ghost" id="headerMenu">Меню</button>
       <button class="btn ghost" id="logoutBtn">Выйти</button>
@@ -317,6 +354,7 @@ footer { text-align:center;color:#71877b;font-size:11px;padding:28px 0 5px; }
             <button id="sendBtn" class="btn primary" type="submit">Отправить ↑</button>
           </form>
           <div class="chat-hint">Enter — отправить · Shift + Enter — новая строка</div>
+          <button id="retryBtn" class="btn ghost" hidden style="margin-top:8px">↻ Повторить последнее сообщение</button>
           <div id="chatStatus" class="status" role="status"></div>
         </div>
       </section>
@@ -394,16 +432,6 @@ footer { text-align:center;color:#71877b;font-size:11px;padding:28px 0 5px; }
 <script>
 "use strict";
 
-/*
- * API contract for server.py:
- * POST /chat
- * {
- *   api_key, message, character_id, history,
- *   character_name?, system_prompt?
- * }
- * Expected response: { success: true, reply: "..." }
- */
-
 const AVATARS = {
   socrat: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_00000000356881f48a43afc0e32e8bb1.PNG",
   bratunya: "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000030a48211ad9240c36185feb6.PNG",
@@ -430,12 +458,14 @@ const $ = id => document.getElementById(id);
 
 let apiKey = "";
 let userName = "";
+let userAvatar = "";
 let characters = [];
 let historyItems = [];
 let activeFilter = "all";
 let activeCharacter = null;
 let activeMessages = [];
 let currentConversationId = null;
+let activeConversationTitle = "";
 let sending = false;
 let toastTimer = null;
 
@@ -459,11 +489,6 @@ function safeWrite(key, value) {
 function makeId() {
   return (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
 }
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, ch => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
-  })[ch]);
-}
 function showToast(message) {
   const toast = $("toast");
   toast.textContent = message;
@@ -483,15 +508,32 @@ function persistCharacters() {
   return safeWrite(STORAGE.characters, characters);
 }
 function persistHistory() {
-  return safeWrite(STORAGE.history, historyItems);
+  try {
+    localStorage.setItem(STORAGE.history, JSON.stringify(historyItems));
+    return true;
+  } catch (e) {
+    if (e.name === "QuotaExceededError" || e.code === 22) {
+      const removeCount = Math.max(1, Math.floor(historyItems.length * 0.1));
+      historyItems.sort((a, b) => b.updatedAt - a.updatedAt);
+      historyItems = historyItems.slice(0, historyItems.length - removeCount);
+      try {
+        localStorage.setItem(STORAGE.history, JSON.stringify(historyItems));
+        showToast("Хранилище переполнено — удалено " + removeCount + " старых диалогов.");
+        return true;
+      } catch {
+        showToast("Не удалось сохранить историю. Освободи место в браузере.");
+        return false;
+      }
+    }
+    showToast("Не удалось сохранить историю.");
+    return false;
+  }
 }
 function loadLocalData() {
   const storedCharacters = safeRead(STORAGE.characters, null);
   characters = Array.isArray(storedCharacters)
     ? storedCharacters.filter(c => c && typeof c.id === "string" && typeof c.name === "string")
     : [];
-
-  // Refresh built-in character metadata with the current avatar URLs.
   characters = characters.filter(c => !DEFAULT_CHARACTERS.some(d => d.id === c.id));
   characters = DEFAULT_CHARACTERS.map(d => ({...d})).concat(characters);
 
@@ -506,6 +548,19 @@ function showApp() {
   $("heroTitle").textContent = userName ? "Специально для тебя, " + userName : "Специально для тебя";
   $("profileName").value = userName;
   $("profileKey").value = apiKey;
+
+  const ha = $("headerAvatar");
+  const hf = $("headerAvatarFallback");
+  if (userAvatar) {
+    ha.src = userAvatar;
+    ha.hidden = false;
+    hf.hidden = true;
+  } else {
+    ha.hidden = true;
+    hf.hidden = false;
+    hf.textContent = (userName || "N").charAt(0).toUpperCase();
+  }
+
   renderCharacters();
   showScreen("home");
 }
@@ -629,9 +684,11 @@ function openChat(characterId, conversationId=null) {
   activeCharacter = character;
   currentConversationId = conversationId || makeId();
   activeMessages = [];
+  activeConversationTitle = "";
   const previous = conversationId ? historyItems.find(h => h.id === conversationId) : null;
   if (previous && Array.isArray(previous.messages)) {
     activeMessages = previous.messages.map(m => ({role:m.role,content:m.content}));
+    activeConversationTitle = previous.title || "";
   }
 
   $("chatName").textContent = character.name;
@@ -653,6 +710,7 @@ function openChat(characterId, conversationId=null) {
   }
   renderMessages();
   setStatus("chatStatus", "");
+  $("retryBtn").hidden = true;
   showScreen("chat");
   $("messageInput").focus();
 }
@@ -673,37 +731,72 @@ function renderMessages() {
     container.append(welcome);
   } else {
     activeMessages.forEach(m => {
+      const wrap = document.createElement("div");
+      wrap.style.display = "flex";
+      wrap.style.gap = "8px";
+      wrap.style.alignItems = "flex-start";
+      wrap.style.maxWidth = "85%";
+      if (m.role === "user") {
+        wrap.style.alignSelf = "flex-end";
+        wrap.style.flexDirection = "row-reverse";
+      }
+
       const bubble = document.createElement("div");
       bubble.className = "message " + (m.role === "user" ? "user" : "assistant");
+      bubble.style.maxWidth = "100%";
       const role = document.createElement("div");
       role.className = "message-role";
       role.textContent = m.role === "user" ? (userName || "Ты") : activeCharacter.name;
       const text = document.createElement("div");
       text.className = "message-text";
       text.textContent = m.content;
-      bubble.append(role,text);
-      container.append(bubble);
+      bubble.append(role, text);
+
+      if (m.role === "user" && userAvatar) {
+        const av = document.createElement("img");
+        av.className = "avatar-mini";
+        av.style.width = "28px";
+        av.style.height = "28px";
+        av.style.flexShrink = "0";
+        av.src = userAvatar;
+        av.alt = userName;
+        wrap.append(bubble, av);
+      } else {
+        wrap.append(bubble);
+      }
+
+      container.append(wrap);
     });
   }
   container.scrollTop = container.scrollHeight;
 }
 function saveConversation() {
   if (!activeCharacter || !activeMessages.length) return;
+
   const firstUser = activeMessages.find(m => m.role === "user");
   const entry = {
     id: currentConversationId,
     characterId: activeCharacter.id,
     characterName: activeCharacter.name,
     avatar: activeCharacter.avatar || "",
-    title: firstUser ? firstUser.content.slice(0,70) : "Новый диалог",
+    title: activeConversationTitle || (firstUser ? firstUser.content.slice(0,70) : "Новый диалог"),
     updatedAt: Date.now(),
-    messages: activeMessages.slice(-40)
+    messages: activeMessages.slice(-200)
   };
+
   const index = historyItems.findIndex(h => h.id === currentConversationId);
   if (index >= 0) historyItems[index] = entry;
   else historyItems.unshift(entry);
-  historyItems.sort((a,b) => b.updatedAt - a.updatedAt);
-  historyItems = historyItems.slice(0,60);
+
+  historyItems.sort((a, b) => b.updatedAt - a.updatedAt);
+
+  const perCharacter = {};
+  historyItems = historyItems.filter(item => {
+    const key = item.characterId || "unknown";
+    perCharacter[key] = (perCharacter[key] || 0) + 1;
+    return perCharacter[key] <= 1000;
+  });
+
   persistHistory();
 }
 function renderHistory() {
@@ -718,6 +811,7 @@ function renderHistory() {
       id:item.characterId, name:item.characterName || "Персонаж", avatar:item.avatar || ""
     };
     const avatar = makeAvatarElement(character, "avatar-mini");
+
     const info = document.createElement("div");
     info.className = "history-info";
     const title = document.createElement("strong");
@@ -726,17 +820,58 @@ function renderHistory() {
     preview.textContent = item.title || "Диалог";
     const date = document.createElement("p");
     date.textContent = new Date(item.updatedAt || Date.now()).toLocaleString("ru-RU");
-    info.append(title,preview,date);
+    info.append(title, preview, date);
+
     const openBtn = document.createElement("button");
     openBtn.className = "btn";
     openBtn.textContent = "Открыть";
     openBtn.addEventListener("click", () => openChat(item.characterId, item.id));
-    row.append(avatar,info,openBtn);
+
+    const renameBtn = document.createElement("button");
+    renameBtn.className = "btn ghost";
+    renameBtn.textContent = "✎";
+    renameBtn.title = "Переименовать диалог";
+    renameBtn.addEventListener("click", () => {
+      const newTitle = prompt("Новое название диалога:", item.title || "Диалог");
+      if (newTitle === null) return;
+      const trimmed = newTitle.trim().slice(0, 70);
+      if (!trimmed) return;
+
+      item.title = trimmed;
+      item.updatedAt = Date.now();
+
+      if (item.id === currentConversationId) {
+        activeConversationTitle = trimmed;
+      }
+
+      persistHistory();
+      renderHistory();
+      showToast("Диалог переименован.");
+    });
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "btn danger";
+    deleteBtn.textContent = "🗑";
+    deleteBtn.title = "Удалить диалог";
+    deleteBtn.addEventListener("click", () => {
+      if (!confirm("Удалить диалог «" + (item.title || "без названия") + "»?")) return;
+
+      historyItems = historyItems.filter(h => h.id !== item.id);
+
+      if (item.id === currentConversationId) {
+        activeConversationTitle = "";
+      }
+
+      persistHistory();
+      renderHistory();
+      showToast("Диалог удалён.");
+    });
+
+    row.append(avatar, info, openBtn, renameBtn, deleteBtn);
     list.append(row);
   });
 }
 function buildApiHistory(messages) {
-  // Send a bounded portion of the conversation to the backend.
   return messages.slice(-20).map(m => ({
     role: m.role === "assistant" ? "model" : "user",
     content: String(m.content).slice(0,12000)
@@ -757,8 +892,10 @@ async function sendMessage(message) {
   $("sendBtn").disabled = true;
   $("messageInput").disabled = true;
   setStatus("chatStatus", "");
+  $("retryBtn").hidden = true;
   activeMessages.push({role:"user",content:message});
   renderMessages();
+  saveConversation();
   $("typing").hidden = false;
 
   try {
@@ -769,7 +906,6 @@ async function sendMessage(message) {
       history: buildApiHistory(activeMessages.slice(0,-1))
     };
 
-    // Custom characters pass their prompt to the backend.
     if (activeCharacter.category === "new") {
       payload.character_name = activeCharacter.name;
       payload.system_prompt = activeCharacter.prompt;
@@ -799,9 +935,78 @@ async function sendMessage(message) {
     renderMessages();
   } catch (error) {
     const msg = error && error.message ? error.message : "Не удалось отправить сообщение.";
-    setStatus("chatStatus", msg, "error");
-    // Preserve the user's message but allow retrying it manually.
+    setStatus("chatStatus", msg + " · Можно повторить.", "error");
+    $("retryBtn").hidden = false;
+  } finally {
+    sending = false;
+    $("typing").hidden = true;
+    $("sendBtn").disabled = false;
+    $("messageInput").disabled = false;
+    $("messageInput").focus();
+  }
+}
+async function retryLastMessage() {
+  if (sending || !activeCharacter) return;
+  if (!apiKey) return;
+
+  let lastUserIndex = -1;
+  for (let i = activeMessages.length - 1; i >= 0; i--) {
+    if (activeMessages[i].role === "user") { lastUserIndex = i; break; }
+  }
+  if (lastUserIndex < 0) return;
+
+  const text = activeMessages[lastUserIndex].content;
+
+  if (lastUserIndex < activeMessages.length - 1) {
+    activeMessages = activeMessages.slice(0, lastUserIndex + 1);
     renderMessages();
+  }
+
+  $("retryBtn").hidden = true;
+  setStatus("chatStatus", "");
+  sending = true;
+  $("sendBtn").disabled = true;
+  $("messageInput").disabled = true;
+  $("typing").hidden = false;
+
+  try {
+    const payload = {
+      api_key: apiKey,
+      message: text,
+      character_id: activeCharacter.id,
+      history: buildApiHistory(activeMessages.slice(0, lastUserIndex))
+    };
+    if (activeCharacter.category === "new") {
+      payload.character_name = activeCharacter.name;
+      payload.system_prompt = activeCharacter.prompt;
+    }
+
+    const response = await fetch("/chat", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
+    });
+
+    let data;
+    try { data = await response.json(); }
+    catch { throw new Error("Сервер вернул не JSON."); }
+
+    if (!response.ok || data.success === false) {
+      throw new Error(data.error || "Ошибка сервера: " + response.status);
+    }
+
+    const reply = data.reply || data.response || data.message;
+    if (typeof reply !== "string" || !reply.trim()) {
+      throw new Error("Сервер не вернул текст ответа.");
+    }
+
+    activeMessages.push({role:"assistant",content:reply.trim()});
+    saveConversation();
+    renderMessages();
+  } catch (error) {
+    const msg = error && error.message ? error.message : "Ошибка";
+    setStatus("chatStatus", msg + " · Можно повторить.", "error");
+    $("retryBtn").hidden = false;
   } finally {
     sending = false;
     $("typing").hidden = true;
@@ -811,21 +1016,77 @@ async function sendMessage(message) {
   }
 }
 
+$("registerAvatar").addEventListener("change", () => {
+  const file = $("registerAvatar").files[0];
+  const preview = $("registerAvatarPreview");
+  if (!file) {
+    preview.hidden = true;
+    preview.src = "";
+    return;
+  }
+  if (!["image/png","image/jpeg","image/webp"].includes(file.type)) {
+    showToast("Используй PNG, JPEG или WebP.");
+    $("registerAvatar").value = "";
+    preview.hidden = true;
+    return;
+  }
+  if (file.size > 1024 * 1024) {
+    showToast("Изображение должно быть меньше 1 МБ.");
+    $("registerAvatar").value = "";
+    preview.hidden = true;
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    preview.src = reader.result;
+    preview.hidden = false;
+  };
+  reader.onerror = () => {
+    showToast("Не удалось прочитать изображение.");
+    preview.hidden = true;
+  };
+  reader.readAsDataURL(file);
+});
+
 $("authForm").addEventListener("submit", event => {
   event.preventDefault();
   const name = $("userName").value.trim();
   const key = $("apiKey").value.trim();
+  const avatarFile = $("registerAvatar").files[0];
+
   if (!name) return setStatus("authStatus","Введи имя или ник.","error");
   if (!key) return setStatus("authStatus","Введи Gemini API-ключ.","error");
   if (/\s/.test(key)) return setStatus("authStatus","Проверь формат API-ключа.","error");
 
-  userName = name.slice(0,60);
-  apiKey = key;
-  try { sessionStorage.setItem("nogliktalk_api_key",apiKey); }
-  catch { /* key remains in memory for this page */ }
-  safeWrite(STORAGE.name,userName);
-  loadLocalData();
-  showApp();
+  const finishLogin = () => {
+    userName = name.slice(0,60);
+    apiKey = key;
+    try { sessionStorage.setItem("nogliktalk_api_key",apiKey); }
+    catch {}
+    safeWrite(STORAGE.name,userName);
+    loadLocalData();
+    showApp();
+  };
+
+  if (avatarFile) {
+    if (!["image/png","image/jpeg","image/webp"].includes(avatarFile.type)) {
+      return setStatus("authStatus","Используй PNG, JPEG или WebP.","error");
+    }
+    if (avatarFile.size > 1024 * 1024) {
+      return setStatus("authStatus","Изображение должно быть меньше 1 МБ.","error");
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      userAvatar = reader.result;
+      try { sessionStorage.setItem("nogliktalk_avatar", userAvatar); }
+      catch {}
+      finishLogin();
+    };
+    reader.onerror = () => setStatus("authStatus","Не удалось прочитать аватарку.","error");
+    reader.readAsDataURL(avatarFile);
+  } else {
+    finishLogin();
+  }
 });
 
 $("logoutBtn").addEventListener("click", () => {
@@ -877,6 +1138,8 @@ $("clearHistory").addEventListener("click", () => {
   persistHistory();
   renderHistory();
 });
+$("retryBtn").addEventListener("click", retryLastMessage);
+
 $("createForm").addEventListener("submit", async event => {
   event.preventDefault();
   setStatus("createStatus","");
@@ -950,9 +1213,25 @@ $("showKey").addEventListener("click", () => {
   $("profileKey").type = $("profileKey").type === "password" ? "text" : "password";
 });
 
+document.querySelectorAll("[data-toggle-password]").forEach(button => {
+  button.addEventListener("click", () => {
+    const input = $(button.dataset.togglePassword);
+    if (!input) return;
+    const showing = input.type === "password";
+    input.type = showing ? "text" : "password";
+    button.textContent = showing ? "🙈" : "👁";
+    button.setAttribute(
+      "aria-label",
+      showing ? "Скрыть API-ключ" : "Показать API-ключ"
+    );
+  });
+});
+
 function initialize() {
   try { apiKey = sessionStorage.getItem("nogliktalk_api_key") || ""; }
   catch { apiKey = ""; }
+  try { userAvatar = sessionStorage.getItem("nogliktalk_avatar") || ""; }
+  catch { userAvatar = ""; }
 
   const savedName = safeRead(STORAGE.name,"");
   userName = typeof savedName === "string" ? savedName : "";
@@ -969,4 +1248,4 @@ function initialize() {
 initialize();
 </script>
 </body>
-</
+  </html>
