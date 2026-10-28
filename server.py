@@ -87,16 +87,32 @@ CHARACTERS = {
 def get_character(data):
     character_id = str(data.get("character_id", "")).strip()
 
+    # Совместимость идентификаторов HTML и Python.
+    aliases = {
+        "ta_samaya": "ta-samaya"
+    }
+
+    character_id = aliases.get(character_id, character_id)
+
     if character_id in CHARACTERS:
         character = CHARACTERS[character_id]
         return character["name"], character["prompt"]
 
-    # Пользовательский персонаж
-    character_name = str(data.get("character_name", "")).strip()
-    system_prompt = str(data.get("system_prompt", "")).strip()
+    # Пользовательский персонаж.
+    character_name = data.get("character_name", "")
+    system_prompt = data.get("system_prompt", "")
+
+    if not isinstance(character_name, str):
+        return None, None
+
+    if not isinstance(system_prompt, str):
+        return None, None
+
+    character_name = character_name.strip()
+    system_prompt = system_prompt.strip()
 
     if character_name and system_prompt:
-        return character_name[:100], system_prompt[:12000]
+        return character_name[:100], system_prompt[:8000]
 
     return None, None
 
