@@ -29,13 +29,14 @@ input:focus, select:focus { border-color:var(--gold); outline:none; }
 .btn.danger { background:rgba(240,142,142,0.1); color:var(--danger); }
 
 #authScreen { padding:20px; max-width:400px; margin:0 auto; display:flex; flex-direction:column; justify-content:center; height:100vh; }
-.auth-box { display:flex; flex-direction:column; gap:14px; }
+.auth-box { display:flex; flex-direction:column; gap:10px; }
 .title { color:var(--gold2); font-size:32px; text-align:center; margin:0 0 20px; font-family:serif; }
 .error { color:var(--danger); font-size:13px; text-align:center; min-height:18px; }
-.avatar-upload { width:80px; height:80px; border-radius:50%; background:var(--panel); border:2px dashed var(--gold); margin:0 auto; display:grid; place-items:center; cursor:pointer; overflow:hidden; position:relative; }
+.avatar-upload { width:80px; height:80px; border-radius:50%; background:var(--panel); border:2px dashed var(--gold); margin:0 auto 10px; display:grid; place-items:center; cursor:pointer; overflow:hidden; position:relative; }
 .avatar-upload img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; }
 .avatar-upload span { font-size:28px; color:var(--gold); }
 .link { color:var(--gold2); text-align:center; font-size:14px; cursor:pointer; margin-top:10px; }
+.hint { font-size: 11px; color: var(--muted); margin-top: -4px; margin-bottom: 4px; padding-left: 4px; }
 
 #appScreen { display:none; flex-direction:column; height:100vh; }
 header { padding:14px 16px; background:var(--panel); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
@@ -83,6 +84,7 @@ header { padding:14px 16px; background:var(--panel); border-bottom:1px solid var
 <!-- ЭКРАН АВТОРИЗАЦИИ -->
 <div id="authScreen">
   <h1 class="title">NoglikTalk</h1>
+  
   <div class="auth-box" id="loginBox">
     <input type="text" id="loginUser" placeholder="Никнейм">
     <input type="password" id="loginPass" placeholder="Пароль">
@@ -97,9 +99,14 @@ header { padding:14px 16px; background:var(--panel); border-bottom:1px solid var
       <span id="regAvatarPlus">+</span>
       <img id="regAvatarImg" src="" hidden>
     </label>
-    <input type="text" id="regUser" placeholder="Никнейм (от 3 символов)">
-    <input type="password" id="regPass" placeholder="Пароль (от 8 символов)">
-    <button class="btn primary" onclick="doRegister()">Создать аккаунт</button>
+    
+    <input type="text" id="regUser" placeholder="Никнейм">
+    <div class="hint">От 3 символов, только на английском или русском, без пробелов</div>
+    
+    <input type="password" id="regPass" placeholder="Пароль">
+    <div class="hint">Минимум 8 символов</div>
+    
+    <button class="btn primary" onclick="doRegister()" style="margin-top:10px;">Создать аккаунт</button>
     <div class="link" onclick="toggleAuth('login')">Уже есть аккаунт? Войти</div>
     <div class="error" id="regError"></div>
   </div>
@@ -211,7 +218,11 @@ async function doRegister() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Ошибка");
+    
+    // Перекидываем на форму входа и подставляем данные
     alert("Аккаунт создан! Теперь войдите.");
+    document.getElementById('loginUser').value = u;
+    document.getElementById('loginPass').value = p;
     toggleAuth('login');
   } catch (e) {
     err.textContent = e.message;
@@ -357,7 +368,6 @@ async function loadChats() {
     const users = await res.json();
     
     const box = document.getElementById('chatList');
-    // Сохраняем текущее количество, чтобы не перерисовывать зря
     if (box.children.length === users.length) return;
     
     box.innerHTML = "";
