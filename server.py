@@ -9,8 +9,7 @@ app = Flask(__name__, static_folder=None)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 INDEX_FILE = os.path.join(BASE_DIR, "index.html")
 
-# База данных будет в оперативной памяти (или временном файле).
-# На бесплатном Render она стирается при перезапуске сервиса.
+# Файл базы данных будет создаваться в папке проекта
 DATABASE = os.path.join(BASE_DIR, "socium.db")
 
 def get_db():
@@ -172,7 +171,7 @@ def follow():
         db.commit()
         return jsonify({"success": True})
     except sqlite3.IntegrityError:
-        return jsonify({"error": "Уже подписан"}), 400
+        return jsonify({"error": "Вы уже подписаны на этого пользователя"}), 400
 
 @app.route("/api/messages", methods=["POST"])
 def send_message():
@@ -207,9 +206,8 @@ def get_messages(other_id):
 
     return jsonify([dict(m) for m in messages])
 
+init_db()
+
 if __name__ == "__main__":
-    init_db()
     port = int(os.getenv("PORT", "5000"))
     app.run(host="0.0.0.0", port=port)
-else:
-    init_db()
