@@ -17,9 +17,14 @@ GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 DATABASE = os.path.join(BASE_DIR, "socium.db")
 IMG = "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/"
 
+# ==========================================
+# СИСТЕМНЫЕ ПРОМПТЫ И ДАННЫЕ ПЕРСОНАЖЕЙ
+# ==========================================
 CHARACTERS = {
     "socrat": {
-        "name": "Сократ", "category": "system", "tagline": "Философ, который помогает находить ответы.",
+        "name": "Сократ",
+        "category": "system",
+        "tagline": "Философ, который помогает находить ответы.",
         "avatar": IMG + "file_00000000356881f48a43afc0e32e8bb1.png",
         "welcome": "Здравствуй, странник. Скажи мне, что привело тебя ко мне и какую мысль мы сегодня подвергнем сомнению?",
         "prompt": """
@@ -39,7 +44,9 @@ CHARACTERS = {
 """
     },
     "bratunya": {
-        "name": "Братюня", "category": "popular", "tagline": "Энергичный помощник и напарник.",
+        "name": "Братюня",
+        "category": "popular",
+        "tagline": "Энергичный помощник и напарник.",
         "avatar": IMG + "file_0000000026308210bd3e70e4c1c72dc3.png",
         "welcome": "Здорово, бро! Какую базу сегодня разрываем?",
         "prompt": """
@@ -58,7 +65,9 @@ CHARACTERS = {
 """
     },
     "stalin": {
-        "name": "Сталин", "category": "popular", "tagline": "Историческая ролевая интерпретация.",
+        "name": "Сталин",
+        "category": "popular",
+        "tagline": "Историческая ролевая интерпретация.",
         "avatar": IMG + "file_0000000056ac81f4b9167adb3b61206f.png",
         "welcome": "Здравствуйте. Говорите кратко и по делу: какие вопросы требуют нашего с вами внимания?",
         "prompt": """
@@ -78,7 +87,9 @@ CHARACTERS = {
 """
     },
     "pushkin": {
-        "name": "Пушкин", "category": "popular", "tagline": "Литература, ирония, история.",
+        "name": "Пушкин",
+        "category": "popular",
+        "tagline": "Литература, ирония, история.",
         "avatar": IMG + "file_0000000061f4820abb3f3b2e616bda30.png",
         "welcome": "Приветствую вас! Какое чудное мгновение свело нас в этой беседе?",
         "prompt": """
@@ -97,7 +108,9 @@ CHARACTERS = {
 """
     },
     "lavinya": {
-        "name": "Лавинья", "category": "popular", "tagline": "Персонаж для живого общения.",
+        "name": "Лавинья",
+        "category": "popular",
+        "tagline": "Персонаж для живого общения.",
         "avatar": IMG + "file_0000000030a48211ad9240c36185feb6.png",
         "welcome": "Привет-привет! Слушай, у меня тут пара вопросов накопилась... Поможешь?",
         "prompt": """
@@ -121,7 +134,9 @@ CHARACTERS = {
 """
     },
     "obichniy_ii": {
-        "name": "Обычный ИИ", "category": "system", "tagline": "Универсальный помощник.",
+        "name": "Обычный ИИ",
+        "category": "system",
+        "tagline": "Универсальный помощник.",
         "avatar": IMG + "file_000000007068824385c56cb176258343.png",
         "welcome": "Привет! Я твой универсальный помощник. Какую задачу решим?",
         "prompt": """
@@ -143,6 +158,9 @@ CHARACTERS = {
 }
 ALIASES = {"ta_samaya": "lavinya", "ta-samaya": "lavinya"}
 
+# ==========================================
+# БАЗА ДАННЫХ
+# ==========================================
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
@@ -184,6 +202,9 @@ def normalize_character_id(value):
     value = ALIASES.get(value, value)
     return value if value in CHARACTERS else "obichniy_ii"
 
+# ==========================================
+# GEMINI
+# ==========================================
 def call_gemini(api_key, messages, system_prompt):
     if not api_key: raise ValueError("Введи Gemini API key в профиле.")
     contents = []
@@ -207,6 +228,9 @@ def call_gemini(api_key, messages, system_prompt):
     parts = candidates[0].get("content", {}).get("parts", [])
     return "\n".join(str(p.get("text", "")) for p in parts if p.get("text")).strip()
 
+# ==========================================
+# ЭНДПОИНТЫ
+# ==========================================
 @app.route("/")
 def index():
     if not os.path.isfile(INDEX_FILE): return "index.html не найден", 404
