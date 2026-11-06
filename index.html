@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#071c16">
-<title>NoglikTalk v1.107 socium</title>
+<title>NoglikTalk v1.109 water</title>
 <style>
 :root { --bg: #071c16; --panel: #0d2920; --panel2: #12352a; --gold: #d9b66d; --gold2: #f0d99b; --text: #f5f2e9; --muted: #a6b8ad; --border: rgba(217,182,109,.15); --danger: #f08e8e; }
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; } /* Убрал синюю подсветку */
 [hidden] { display:none !important; }
 body { margin:0; background:var(--bg); color:var(--text); font-family:Inter,system-ui,sans-serif; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
 button,input,textarea,select { font:inherit; }
@@ -105,7 +105,8 @@ button:active, .filter:active, .nav-btn:active, .bottom-nav button:active, .mode
 .menu-block h4 { margin: 0 0 8px; color: var(--gold2); font-size: 14px; }
 .profile-header { display:flex; flex-direction:column; align-items:flex-start; padding:20px; text-align:left; }
 .profile-avatar-wrap { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
-.profile-avatar { width:96px; height:96px; border-radius:50%; background:var(--panel2); border:2px solid var(--gold); display:grid; place-items:center; font-size:36px; font-weight:700; color:var(--gold2); position:relative; overflow:hidden;}
+/* Починил круг */
+.profile-avatar { width:96px; height:96px; border-radius:50%; background:var(--panel2); border:2px solid var(--gold); display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; color:var(--gold2); position:relative; overflow:hidden;}
 .profile-avatar img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; display:none;}
 .profile-plus { width:32px; height:32px; border-radius:50%; background:var(--gold); color:#152218; display:grid; place-items:center; font-size:20px; cursor:pointer; font-weight:bold;}
 .profile-name { font-size:24px; color:var(--gold2); font-weight:800; margin:0 0 20px; }
@@ -152,7 +153,7 @@ button:active, .filter:active, .nav-btn:active, .bottom-nav button:active, .mode
   <header class="app-header">
     <div class="brand">
       <div class="brand-mark"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="var(--gold)" stroke-width="2"/><path d="M 35 75 L 35 25 L 65 75 L 65 25" fill="none" stroke="var(--gold)" stroke-width="6" stroke-linecap="round"/></svg></div>
-      NoglikTalk <span>v 1.107 socium</span>
+      NoglikTalk <span>v 1.109 water</span>
     </div>
     <div class="header-avatar" id="myHeaderAvatar">N</div>
   </header>
@@ -174,7 +175,7 @@ button:active, .filter:active, .nav-btn:active, .bottom-nav button:active, .mode
         <section id="screen-home">
           <div class="news-grid">
             <div class="news-card" onclick="document.getElementById('updateModal').hidden=false">
-              <h3>1.107 socium вышла</h3>
+              <h3>1.109 water вышла</h3>
               <p>Нажми, чтобы узнать что нового.</p>
             </div>
             <div class="news-card" style="cursor:default;">
@@ -322,16 +323,30 @@ button:active, .filter:active, .nav-btn:active, .bottom-nav button:active, .mode
   </div>
 </div>
 
+<!-- ЧАТ С ЧЕЛОВЕКОМ (ДОБАВЛЕН ПРОФИЛЬ ПО КЛИКУ НА АВАТАРКУ) -->
 <div id="peopleChatScreen" class="fullscreen-screen" hidden>
   <div class="top-bar">
     <button class="btn ghost" onclick="document.getElementById('peopleChatScreen').hidden=true">←</button>
-    <div class="chat-avatar" id="peopleChatHeaderAvatar"></div>
+    <div class="chat-avatar" id="peopleChatHeaderAvatar" onclick="openPeopleProfile()"></div>
     <div><h2 style="margin:0; font-size:16px;" id="peopleChatHeaderName">Имя</h2><p style="margin:0; font-size:12px; color:var(--muted);">В сети</p></div>
   </div>
   <div class="messages" id="peopleChatMessages"></div>
   <div class="composer">
     <textarea class="textarea" id="peopleChatInput" rows="1" placeholder="Напиши сообщение..." style="border-radius:20px;"></textarea>
     <button class="btn primary" style="width:46px; height:46px; border-radius:50%; padding:0;" onclick="sendPeopleMessage()">➤</button>
+  </div>
+</div>
+
+<!-- МОДАЛКА ПРОФИЛЯ ЧЕЛОВЕКА -->
+<div id="peopleProfileModal" hidden style="position:fixed; inset:0; z-index:250; background:var(--bg); display:flex; flex-direction:column; padding:20px; overflow-y:auto;">
+  <div class="modal-top"><button class="close-modal" onclick="document.getElementById('peopleProfileModal').hidden=true">✕</button></div>
+  <div class="char-profile-inner">
+    <img id="peopleProfileAvatar" src="" class="char-profile-avatar">
+    <h2 class="char-profile-name" id="peopleProfileName">Имя</h2>
+    <div class="author-row" style="border:none; justify-content:center; gap:20px;">
+      <button id="followBtn" class="btn primary" style="width:auto; padding:10px 20px;" onclick="followUser()">Подписаться</button>
+    </div>
+    <div style="color:var(--muted); text-align:center;">Пользователь NoglikTalk</div>
   </div>
 </div>
 
@@ -361,10 +376,11 @@ button:active, .filter:active, .nav-btn:active, .bottom-nav button:active, .mode
 <div id="updateModal" style="position:fixed; inset:0; z-index:300; background:var(--bg); display:flex; flex-direction:column; padding:20px; overflow-y:auto;" hidden>
   <div class="modal-top"><button class="close-modal" onclick="document.getElementById('updateModal').hidden=true">✕</button></div>
   <div class="char-profile-inner" style="align-items:flex-start;">
-    <h2 style="color:var(--gold2); margin:0 0 16px;">Вышла версия 1.107</h2>
+    <h2 style="color:var(--gold2); margin:0 0 16px;">Вышла версия 1.109 water</h2>
     <ul style="color:var(--muted); line-height:1.8; padding-left:20px; font-size:15px;">
-      <li>Можно общаться и подписываться друг на друга.</li>
-      <li>Меню персонажей добавлено.</li>
+      <li>Исправлены баги с отправкой сообщений.</li>
+      <li>Теперь можно подписываться на людей.</li>
+      <li>Убран синий фон при нажатии.</li>
     </ul>
   </div>
 </div>
@@ -389,6 +405,7 @@ button:active, .filter:active, .nav-btn:active, .bottom-nav button:active, .mode
   let allCharacters = [];
   let currentChatChar = null;
   let currentPeopleChat = null;
+  let currentPeopleUserId = null;
 
   async function api(url, method = "GET", body = null) {
     const headers = { "Content-Type": "application/json" };
@@ -567,8 +584,12 @@ button:active, .filter:active, .nav-btn:active, .bottom-nav button:active, .mode
 
   async function openPeopleChat(userId, userName, userAvatar) {
     currentPeopleChat = userId;
+    currentPeopleUserId = userId;
     document.getElementById("peopleChatHeaderName").textContent = userName;
     document.getElementById("peopleChatHeaderAvatar").innerHTML = userAvatar ? `<img src="${userAvatar}">` : userName[0].toUpperCase();
+    document.getElementById("peopleProfileName").textContent = userName;
+    document.getElementById("peopleProfileAvatar").src = userAvatar || "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_000000007068824385c56cb176258343.png";
+    
     document.getElementById("peopleChatMessages").innerHTML = "";
     document.getElementById("peopleChatScreen").hidden = false;
     
@@ -595,6 +616,22 @@ button:active, .filter:active, .nav-btn:active, .bottom-nav button:active, .mode
     try {
       await api("/api/messages", "POST", { to_id: currentPeopleChat, text: text });
     } catch (e) { alert("Ошибка отправки"); }
+  }
+
+  function openPeopleProfile() {
+    document.getElementById("peopleProfileModal").hidden = false;
+  }
+
+  async function followUser() {
+    try {
+      await api("/api/follow", "POST", { target_id: currentPeopleUserId });
+      document.getElementById("followBtn").textContent = "Вы подписаны";
+      document.getElementById("followBtn").disabled = true;
+      alert("Вы подписались на " + document.getElementById("peopleProfileName").textContent);
+      loadProfileStats(); // обновляем счетчики
+    } catch (e) {
+      alert(e.message);
+    }
   }
 
   let charAvatarData = "";
