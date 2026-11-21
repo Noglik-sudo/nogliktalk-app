@@ -4,409 +4,653 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#071c16">
-<title>NoglikTalk v1.109 water</title>
+<title>NoglikTalk v1.157 Achievement</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
-:root { --bg: #071c16; --panel: #0d2920; --panel2: #12352a; --gold: #d9b66d; --gold2: #f0d99b; --text: #f5f2e9; --muted: #a6b8ad; --border: rgba(217,182,109,.15); --danger: #f08e8e; }
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; } /* Убрал синюю подсветку */
+:root { 
+  --bg: #071c16; --header-bg: #0f2e24; --nav-bg: #071c16;
+  --panel: #0d2920; --panel2: #12352a;
+  --gold: #d9b66d; --gold2: #f0d99b;
+  --text: #f5f2e9; --muted: #a6b8ad;
+  --border: rgba(217,182,109,.15); --danger: #f08e8e; 
+  --app-font: 'Inter', sans-serif;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 [hidden] { display:none !important; }
-body { margin:0; background:var(--bg); color:var(--text); font-family:Inter,system-ui,sans-serif; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
-button,input,textarea,select { font:inherit; }
-button { cursor:pointer; }
-button:disabled { opacity:.5; cursor:not-allowed; }
-button:active, .filter:active, .nav-btn:active, .bottom-nav button:active, .mode-btn:active, .card-actions .btn:active, .step-btn:active, .close-modal:active { transform: scale(0.95); }
-#authScreen { position:fixed; inset:0; z-index:999; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
-.auth-logo { width:100px; height:100px; margin-bottom:20px; }
-.auth-title { font-family:'Times New Roman',serif; font-size:40px; color:var(--gold2); margin:0 0 10px; }
-.auth-subtitle { font-size:15px; color:var(--text); margin-bottom:30px; text-align:center; font-style:italic; }
-.auth-form { width:100%; max-width:340px; display:flex; flex-direction:column; gap:14px; }
-.auth-avatar { width:80px; height:80px; border-radius:50%; background:var(--panel); border:1px dashed var(--gold); margin:0 auto 10px; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; overflow:hidden;}
-.auth-avatar .plus { font-size:28px; color:var(--gold); }
-.auth-avatar img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; display:none; }
-.auth-input { width:100%; background:transparent; color:var(--text); border:1px solid var(--gold); border-radius:8px; padding:14px; text-align:center; }
-.auth-input:focus { outline:none; border-color:var(--gold2); }
-.auth-hint { font-size:11px; color:var(--muted); margin-top:-6px; text-align:left; padding-left:4px; }
-.auth-btn { width:100%; background:linear-gradient(90deg,#d9b66d,#f0d99b,#d9b66d); color:#152218; border:none; border-radius:8px; padding:14px; font-size:16px; font-weight:bold; }
-.app-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg); border-bottom:1px solid var(--border); flex-shrink:0;}
+body { 
+  margin:0; background:var(--bg); color:var(--text); 
+  font-family: var(--app-font);
+  height:100vh; display:flex; flex-direction:column; overflow:hidden; 
+  background-image: radial-gradient(circle at top right, rgba(217,182,109,0.05) 0%, transparent 50%);
+}
+button { cursor:pointer; font:inherit; }
+button:active { transform: scale(0.95); }
+
+/* Шапка */
+.app-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--header-bg); border-bottom:1px solid var(--border); flex-shrink:0;}
 .brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:16px; color:var(--gold2);}
-.brand span { font-size: 10px; color: var(--gold); font-weight: normal;}
-.brand-mark { width:36px; height:36px; }
-.header-avatar { width:32px; height:32px; border-radius:50%; border:1px solid var(--gold); display:grid; place-items:center; font-weight:bold; color:var(--gold2); background:var(--panel); overflow:hidden;}
-.btn { border:none; background:var(--panel2); color:var(--text); border-radius:12px; padding:10px 14px; font-weight:500; display:flex; align-items:center; justify-content:center; gap:6px; }
-.btn.primary { background:linear-gradient(135deg,#e8cb84,#c69c4c); color:#152218; font-weight:800; }
-.btn.ghost { background:transparent; color:var(--muted); padding:8px; }
-.input,.textarea { width:100%; background:transparent; color:var(--text); border:1px solid var(--border); border-radius:12px; padding:12px 14px; }
-.input:focus,.textarea:focus { border-color:var(--gold); outline:none; }
+.header-avatar { width:32px; height:32px; border-radius:50%; border:1px solid var(--gold); display:grid; place-items:center; font-weight:bold; color:var(--gold2); background:var(--panel); flex-shrink: 0;}
+
+/* Поиск */
+.search-wrapper { position: relative; flex: 1; margin: 0 12px; max-width: 250px; }
+.search-input-wrapper { display: flex; align-items: center; background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 6px 12px; transition: 0.2s;}
+.search-input-wrapper:focus-within { border-color: var(--gold); background: var(--panel2); }
+.search-input-wrapper svg { width: 16px; height: 16px; fill: var(--muted); margin-right: 8px; flex-shrink: 0;}
+.search-input { background: transparent; border: none; color: var(--text); font-size: 13px; outline: none; width: 100%; }
+
+/* Сетка */
 .layout { display:grid; grid-template-columns:220px minmax(0,1fr); height:calc(100vh - 61px); }
-.sidebar { padding:20px 14px; background:var(--bg); border-right:1px solid var(--border); }
+.sidebar { padding:20px 14px; background:var(--nav-bg); border-right:1px solid var(--border); }
 .nav { display:grid; gap:6px; }
-.nav-btn { text-align:left; padding:12px 14px; border-radius:10px; border:none; background:transparent; color:var(--muted); font-weight:500; }
-.nav-btn.active { background:#183d2d; color:var(--gold2); }
-.nav-label { color:#728b7e; font-size:10px; letter-spacing:1.5px; padding:16px 14px 4px; text-transform:uppercase; font-weight:700;}
+.nav-btn { text-align:left; padding:12px 14px; border-radius:10px; border:none; background:transparent; color:var(--muted); font-weight:500; transition: 0.2s;}
+.nav-btn.active { background:var(--panel2); color:var(--gold2); }
+.nav-label { color:var(--muted); font-size:10px; letter-spacing:1.5px; padding:16px 14px 4px; text-transform:uppercase; font-weight:700; opacity:.7;}
 .main { padding:16px; overflow-y:auto; display:flex; flex-direction:column; }
 .content-wrapper { width:100%; max-width:900px; margin:0 auto; flex:1; }
+
+/* Главная */
 .news-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-.news-card { background: linear-gradient(120deg, #153b2b, #0b2119); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; justify-content: center; cursor:pointer; min-height: 100px; }
+.news-card { background: linear-gradient(120deg, var(--panel2), var(--panel)); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; justify-content: center; cursor:pointer; min-height: 100px; border:1px solid var(--border);}
 .news-card h3 { margin:0 0 6px; font-size: 15px; color: var(--gold2); }
-.news-card p { margin:0; font-size: 12px; color: var(--muted); line-height: 1.4;}
+.news-card p { margin:0; font-size:12px; color:var(--muted); }
 .filters { display:flex; gap:6px; overflow-x:auto; margin-bottom:16px; padding-bottom:4px;}
 .filter { border:none; border-radius:20px; background:var(--panel); color:var(--muted); padding:6px 14px; font-size:12px; font-weight:500; white-space:nowrap;}
-.filter.active { background:#254633; color:var(--gold2); }
-.section-title { font-size:16px; color:var(--gold2); margin: 20px 0 10px; font-weight: bold;}
+.filter.active { background:var(--panel2); color:var(--gold2); }
+.section-title { font-size:18px; color:var(--gold2); margin: 20px 0 10px; font-weight: bold; display: flex; align-items: center; justify-content: space-between;}
+
+/* Карточки */
 .character-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-.character-card { background:var(--panel); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; border:1px solid var(--border);}
-.character-image-wrap { aspect-ratio:1.2; background:#183a2a; }
+.character-card { background:var(--panel); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; border:1px solid var(--border); cursor: pointer;}
+.character-image-wrap { aspect-ratio:1.2; background:var(--panel2); }
 .character-img { width:100%; height:100%; object-fit:cover; }
 .character-body { padding:10px; display:flex; flex-direction:column; flex:1;}
-.character-body h3 { margin:0 0 2px; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.character-body h3 { margin:0 0 2px; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color: var(--text);}
 .character-desc { color:var(--muted); font-size:10px; line-height:1.3; min-height:26px; flex-grow:1; }
 .card-actions { display:flex; gap:6px; margin-top:8px; }
-.card-actions .btn { flex:1; padding:6px 4px; font-size:11px; border-radius:6px; }
-.fullscreen-screen { position:fixed; inset:0; z-index:100; background:var(--bg); display:flex; flex-direction:column; }
-.top-bar { padding:12px 16px; background:var(--bg); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; flex-shrink:0;}
-.chat-avatar { width:40px; height:40px; border-radius:50%; overflow:hidden; cursor:pointer; }
-.chat-avatar img { width:100%; height:100%; object-fit:cover; }
-.messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
-.msg { max-width:85%; border-radius:16px; padding:10px 14px; font-size:14px; line-height:1.5; }
-.msg.user { align-self:flex-end; background:#254631; }
-.msg.assistant { align-self:flex-start; background:var(--panel); }
-.composer { padding:12px; background:var(--bg); border-top:1px solid var(--border); display:flex; gap:8px; flex-shrink:0;}
-#charProfileModal { position:fixed; inset:0; z-index:200; background:var(--bg); display:flex; flex-direction:column; overflow-y:auto; padding:20px; }
-.modal-top { display:flex; justify-content:flex-end; margin-bottom:10px; }
+.card-actions .btn { flex:1; padding:6px 4px; font-size:11px; border-radius:6px; border:none; background:var(--panel2); color:var(--text); }
+.card-actions .btn.primary { background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#152218; font-weight:800; }
+
+/* Общие элементы */
+.mode-switch, .step-switch, .chat-tabs, .game-type-switch { display:flex; gap:6px; background:var(--panel2); border-radius:14px; padding:4px; margin-bottom:16px; }
+.mode-btn, .step-btn, .type-btn { flex:1; border:none; background:transparent; color:var(--muted); padding:10px; border-radius:10px; font-size:13px; font-weight:700; cursor: pointer; transition: 0.2s; display:flex; align-items:center; justify-content:center; gap:6px;}
+.mode-btn.active, .step-btn.active, .type-btn.active { background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#152218; }
+.type-btn svg { width:18px; height:18px; fill:currentColor; }
+
+.panel, .block-card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:14px; }
+.block-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.block-header h4 { margin:0; color:var(--gold2); font-size:14px; }
+.help-box { background:rgba(217,182,109,0.08); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:14px; font-size:13px; color:var(--muted); }
+.help-box b { display:block; color:var(--gold2); margin-bottom:4px; }
+.choice-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
+.choice-row input, .choice-row select { background:var(--panel2); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px; font-size:13px; }
+.choice-row input { flex:1; }
+.quiz-option { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.avatar-upload-wrap { display:flex; justify-content:center; margin-bottom:14px; }
+.avatar-upload { width:72px; height:72px; border-radius:50%; background:var(--panel2); border:1px dashed var(--gold); display:grid; place-items:center; cursor:pointer; }
+.plus-icon { font-size:24px; color:var(--gold2); }
+.placeholder-screen { background:var(--panel); border:1px dashed var(--border); border-radius:14px; padding:24px; text-align:center; color:var(--muted); }
+
+.field { display:grid; gap:6px; margin-bottom:14px; }
+.field label { font-size:13px; color:var(--muted); font-weight: 500;}
+.input, .textarea, select { width:100%; background:var(--panel2); color:var(--text); border:1px solid transparent; border-radius:10px; padding:12px; font-family: inherit; font-size: 14px; transition: 0.2s;}
+.input:focus, .textarea:focus, select:focus { border-color:var(--gold); outline:none; }
+.btn { border:none; background:var(--panel2); color:var(--text); border-radius:10px; padding:12px 16px; font-weight:600; cursor:pointer; font-size: 14px; display:flex; align-items:center; justify-content:center; gap:8px; transition: 0.2s;}
+.btn.primary { background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#152218; }
+.btn.outline { background: transparent; border: 1px dashed var(--gold); color: var(--gold2); }
+.btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+.btn.full { width: 100%; margin-top: 10px; }
+.btn.small { padding: 8px 12px; font-size: 13px; border-radius: 8px; }
+.delete-btn { background: rgba(240, 142, 142, 0.1); border: none; color: var(--danger); font-size: 16px; cursor: pointer; padding: 4px 8px; border-radius: 6px;}
+
+.color-row { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px; }
+.color-row label { font-size:13px; color:var(--muted); }
+.color-row input { width:170px; background:var(--panel2); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:13px; }
+
+/* Лига */
+#screen-league .player-progress { 
+  background: var(--panel); border: 1px solid var(--gold); border-radius: 16px; 
+  padding: 20px; margin-bottom: 30px; position: relative; overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+#screen-league .player-progress::before {
+  content: ''; position: absolute; top:0; left:0; right:0; height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold2), transparent);
+}
+.progress-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; justify-content: space-between;}
+.rank-info { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+.rank-icon { width: 64px; height: 64px; }
+.rank-name { font-size: 24px; font-weight: 800; color: var(--gold2); }
+.rank-sub { font-size: 14px; color: var(--text); }
+.progress-bar-bg { width: 100%; height: 10px; background: var(--bg); border-radius: 5px; overflow: hidden; margin-bottom: 8px;}
+.progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #c69c4c, #f0d99b); border-radius: 5px; transition: width 0.5s;}
+.progress-numbers { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); font-family: monospace;}
+
+.league-list { display: flex; flex-direction: column; gap: 12px; }
+.league-card { 
+  display: flex; align-items: center; gap: 16px; background: var(--panel); 
+  border: 1px solid var(--border); border-radius: 14px; padding: 16px; 
+  transition: 0.2s; cursor: pointer;
+}
+.league-card:hover { border-color: var(--gold); background: var(--panel2); }
+.league-card.active { border-color: var(--gold); box-shadow: 0 0 15px rgba(217,182,109,0.15); }
+.league-card-icon { width: 48px; height: 48px; flex-shrink: 0; }
+.league-card-body { flex: 1; }
+.league-card-name { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; display: flex; align-items: center; gap: 8px;}
+.league-card-title { font-size: 13px; color: var(--gold2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
+.league-card-rp { font-size: 13px; color: var(--muted); margin-top: 4px;}
+
+/* Модалки */
+.fullscreen-screen { position:fixed; inset:0; z-index:100; background:var(--bg); display:flex; flex-direction:column; overflow-y:auto; }
+.modal-top { display:flex; justify-content:flex-end; margin-bottom:10px; padding: 10px 16px;}
 .close-modal { background:transparent; border:none; color:var(--text); font-size:24px; padding:8px; cursor:pointer; }
-.char-profile-inner { max-width:600px; margin:0 auto; width:100%; display:flex; flex-direction:column; align-items:center; }
-.char-profile-avatar { width:140px; height:140px; border-radius:50%; border:2px solid var(--gold); object-fit:cover; margin-bottom:16px; }
-.char-profile-name { font-size:26px; font-weight:800; color:var(--gold2); margin:0 0 4px; }
-.char-profile-desc { font-size:14px; color:var(--muted); text-align:center; margin-bottom:30px; max-width:400px; line-height:1.5;}
-.author-row { display:flex; align-items:center; justify-content:space-between; width:100%; padding:16px 0; margin-bottom:20px; border-top:1px solid var(--border); border-bottom:1px solid var(--border);}
-.author-name { font-size:15px; font-weight:600; color:var(--text); display:flex; align-items:center; gap:10px;}
-.btn-like { background:transparent; border:none; width:40px; height:40px; display:grid; place-items:center; cursor:pointer; color:var(--muted); padding:0;}
-.btn-like.liked { color:var(--gold); }
-.btn-like svg { width:28px; height:28px; fill:currentColor; }
-.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; width:100%; padding-top:20px; }
-.stat-item { text-align:center; }
-.stat-val { font-size:20px; font-weight:700; color:var(--text); }
-.stat-label { font-size:12px; color:var(--muted); margin-top:4px;}
-.btn-write-author { width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,#e8cb84,#c69c4c); color:#152218; display:grid; place-items:center; margin:20px auto 0; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.3); border:none; }
-.btn-write-author svg { width:28px; height:28px; fill:currentColor; }
-.mode-switch { display:flex; background:var(--panel2); border-radius:14px; padding:4px; margin-bottom:16px; }
-.mode-btn { flex:1; border:none; background:transparent; color:var(--muted); padding:10px; border-radius:10px; font-size:14px; font-weight:700; }
-.mode-btn.active { background:linear-gradient(135deg,#e8cb84,#c69c4c); color:#152218; }
-.panel { padding:0; } 
-.field { display:grid; gap:6px; margin:14px 0; }
-.field label { font-size:13px; font-weight:500; }
-.avatar-upload-wrap { display:flex; flex-direction:column; align-items:center; margin-bottom:10px; }
-.avatar-upload { width:80px; height:80px; border-radius:50%; background:transparent; border:2px dashed var(--gold); display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; overflow:hidden;}
-.avatar-upload .plus-icon { font-size:28px; color:var(--gold); font-weight:300; }
-.avatar-upload img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; display:none;}
-.step-switch { display:flex; background:var(--panel2); border-radius:12px; padding:4px; margin-bottom:20px; }
-.step-btn { flex:1; border:none; background:transparent; color:var(--muted); padding:8px; border-radius:8px; font-size:12px; font-weight:500; }
-.step-btn.active { background:var(--gold); color:#152218; }
-.menu-block { margin-bottom: 16px; }
-.menu-block h4 { margin: 0 0 8px; color: var(--gold2); font-size: 14px; }
+.modal-inner { max-width:600px; margin:0 auto; width:100%; display:flex; flex-direction:column; padding:20px; }
+
+/* Чат */
+.messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
+.msg { max-width:85%; border-radius:16px; padding:10px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap; }
+.msg.user { align-self:flex-end; background:var(--panel2); }
+.msg.assistant { align-self:flex-start; background:var(--panel); border: 1px solid var(--border); }
+.composer { padding:12px; background:var(--bg); border-top:1px solid var(--border); display:flex; gap:8px; flex-shrink:0;}
+
+/* Игровые кнопки */
+#gameControls { display: none; flex-direction: column; gap: 8px; padding: 12px; background: var(--bg); border-top: 1px solid var(--border); flex-shrink: 0; }
+.game-choice-btn { width: 100%; padding: 14px; background: var(--panel); border: 1px solid var(--gold); color: var(--gold2); border-radius: 12px; font-weight: 600; font-size: 14px; text-align: center; cursor: pointer; transition: 0.2s; }
+.game-choice-btn:hover { background: var(--panel2); }
+.game-end-btn { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+/* Профиль */
 .profile-header { display:flex; flex-direction:column; align-items:flex-start; padding:20px; text-align:left; }
-.profile-avatar-wrap { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
-/* Починил круг */
-.profile-avatar { width:96px; height:96px; border-radius:50%; background:var(--panel2); border:2px solid var(--gold); display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; color:var(--gold2); position:relative; overflow:hidden;}
-.profile-avatar img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; display:none;}
-.profile-plus { width:32px; height:32px; border-radius:50%; background:var(--gold); color:#152218; display:grid; place-items:center; font-size:20px; cursor:pointer; font-weight:bold;}
+.profile-avatar { width:96px; height:96px; border-radius:50%; background:var(--panel2); border:2px solid var(--gold); display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; color:var(--gold2); margin-bottom: 15px;}
 .profile-name { font-size:24px; color:var(--gold2); font-weight:800; margin:0 0 20px; }
 .profile-stats { display:flex; gap:20px; margin-top:10px; flex-wrap:wrap; }
+
+/* Ачивки */
+.btn-achievements { width: 100%; margin-top: 10px; padding: 12px 16px; background: var(--panel2); color: var(--gold2); border: 1px solid var(--border); border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
+.btn-achievements:hover { border-color: var(--gold); background: var(--panel); }
+.achievements-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 300; backdrop-filter: blur(5px); }
+.achievements-modal-container { background: var(--bg); border: 1px solid var(--border); width: 92%; max-width: 650px; max-height: 85vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+.achievements-header { padding: 14px 20px; background: var(--header-bg); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+.achievements-grid { padding: 16px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 12px; }
+.achievement-card { background: var(--panel); border-radius: 12px; padding: 12px; text-align: center; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; opacity: 0.5; transition: 0.2s; }
+.achievement-card.unlocked { opacity: 1; border-color: var(--gold); background: linear-gradient(135deg, var(--panel), var(--panel2)); }
+.achievement-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; color: var(--gold2); }
+.achievement-desc { font-size: 11px; color: var(--muted); line-height: 1.3; flex-grow: 1; margin-bottom: 6px; }
+.achievement-reward { font-size: 11px; color: var(--gold); font-weight: 700; margin-bottom: 6px; }
+.achievement-status { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: var(--bg); color: var(--muted); }
+.achievement-card.unlocked .achievement-status { background: rgba(217, 182, 109, 0.15); color: var(--gold2); }
+
+/* Окно профиля ПЕРСОНАЖА */
+#charProfileScreen { background: var(--bg); overflow-y: auto; padding: 20px; align-items: center; z-index: 200; }
+.char-prof-header { display: flex; justify-content: space-between; width: 100%; max-width: 600px; margin-bottom: 10px; }
+.char-prof-content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 600px; flex: 1;}
+.char-prof-avatar-wrap { display: flex; justify-content: center; align-items: flex-start; margin-top: 10px; margin-bottom: 15px; }
+.char-prof-avatar { width: 160px; height: 160px; border-radius: 50%; border: 3px solid var(--gold); object-fit: cover; box-shadow: 0 0 30px rgba(217,182,109,0.2);}
+.char-prof-name { font-size: 32px; font-weight: 800; color: var(--gold2); margin: 0 0 10px; text-align: center;}
+.char-prof-desc { font-size: 16px; color: var(--muted); text-align: center; line-height: 1.5; margin-bottom: 15px; max-width: 500px;}
+.char-about-text { font-size: 14px; color: var(--text); text-align: center; line-height: 1.6; margin-bottom: 25px; max-width: 500px; background: var(--panel); padding: 16px; border-radius: 12px; border: 1px solid var(--border); font-style: italic;}
+.char-prof-actions { display: flex; gap: 15px; margin-bottom: 25px; width: 100%; justify-content: center; align-items: center;}
+.btn-circle { width: 54px; height: 54px; border-radius: 50%; border: 1px solid var(--border); background: var(--panel); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s;}
+.btn-circle svg { width: 24px; height: 24px; fill: var(--muted); transition: 0.2s;}
+.btn-circle.active svg { fill: var(--gold); }
+
+.char-prof-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; margin-bottom: 30px; padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);}
+.char-stat-item { text-align: center; }
+.char-stat-val { font-size: 24px; font-weight: 700; color: var(--text); }
+.char-stat-label { font-size: 13px; color: var(--muted); margin-top: 4px;}
+.btn-comments { width: 100%; max-width: 400px; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;}
+
+.rating-container { display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%; max-width: 400px; margin-bottom: 30px; background: var(--panel); padding: 15px; border-radius: 16px; border: 1px solid var(--border); }
+.rating-slider { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 5px; background: var(--panel2); outline: none; transition: opacity .2s; }
+.rating-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--gold); cursor: pointer; box-shadow: 0 0 10px rgba(217,182,109,0.5); }
+.rating-slider::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: var(--gold); cursor: pointer; box-shadow: 0 0 10px rgba(217,182,109,0.5); border: none; }
+.rating-value { font-size: 20px; font-weight: 800; color: var(--gold2); min-width: 40px; text-align: right; }
+.btn-action-small { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel2); display: flex; justify-content: center; align-items: center; cursor: pointer; color: var(--muted); transition: 0.2s; }
+.btn-action-small:hover { color: var(--gold); border-color: var(--gold); }
+.btn-action-small svg { width: 22px; height: 22px; fill: currentColor; }
+
+/* Нижнее меню */
 .bottom-nav { display:none; }
+
 @media(max-width:720px) {
   .layout { display:block; height:calc(100vh - 61px); }
   .sidebar { display:none; }
   .main { padding:12px 12px 80px; height:100%; }
   .character-grid { grid-template-columns:repeat(3,1fr); gap:8px; }
-  .character-body h3 { font-size: 12px; }
   .character-desc { font-size: 9px; min-height: 22px; }
   .card-actions { flex-direction:column; }
-  .bottom-nav { position:fixed; bottom:0; left:0; right:0; z-index:20; display:grid; grid-template-columns:repeat(4,1fr); padding:6px 6px calc(6px + env(safe-area-inset-bottom)); background:rgba(7,28,22,.98); border-top:1px solid var(--border); backdrop-filter:blur(10px); }
-  .bottom-nav button { border:0; background:transparent; color:var(--muted); padding:6px; font-size:10px; display:flex; flex-direction:column; align-items:center; gap:2px;}
-  .bottom-nav button.active { color:var(--gold2); }
   .news-grid { grid-template-columns: 1fr 1fr; }
+  .char-prof-avatar { width: 140px; height: 140px; }
+  .char-prof-name { font-size: 26px; }
+  
+  .bottom-nav { 
+    position:fixed; bottom:0; left:0; right:0; z-index:20; 
+    display:grid; grid-template-columns:repeat(5,1fr); 
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom)); 
+    background:rgba(7,28,22,.98); border-top:1px solid var(--border); backdrop-filter:blur(10px); 
+  }
+  .bottom-nav button { border:0; background:transparent; color:var(--muted); padding:6px 2px; font-size:9px; display:flex; flex-direction:column; align-items:center; gap:2px;}
+  .bottom-nav button.active { color:var(--gold2); }
+
+  .type-btn span { display: none; }
+  .type-btn svg { width: 22px; height: 22px; }
 }
 </style>
 </head>
 <body>
 
-<div id="authScreen">
-  <div class="auth-logo"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="var(--gold)" stroke-width="2"/><path d="M 35 75 L 35 25 L 65 75 L 65 25" fill="none" stroke="var(--gold)" stroke-width="6" stroke-linecap="round"/></svg></div>
-  <h1 class="auth-title">NoglikTalk</h1>
-  <p class="auth-subtitle">Привет! Создай аккаунт.<br>Ключ можно вставить позже в профиле.</p>
-  <form class="auth-form" id="regForm">
-    <label class="auth-avatar">
-      <input type="file" id="regAvatarInput" accept="image/*" style="display:none;" onchange="showRegAvatar(this)">
-      <span class="plus" id="regAvatarPlus">+</span>
-      <img id="regAvatarImg" src="" alt="">
-    </label>
-    <input type="text" class="auth-input" id="regUsername" placeholder="Введи свой псевдоним" required>
-    <div>
-      <input type="password" class="auth-input" id="regPassword" placeholder="Придумай пароль">
-      <div class="auth-hint">Минимум 8 символов</div>
+<!-- МОДАЛЬНОЕ ОКНО АЧИВОК -->
+<div id="achievementsModal" class="achievements-modal-overlay" style="display: none;">
+  <div class="achievements-modal-container">
+    <div class="achievements-header">
+      <h2 style="margin:0; font-size:16px; color:var(--gold2);">Достижения</h2>
+      <button class="close-modal" style="font-size:20px; padding:4px;" onclick="closeAchievements()">✕</button>
     </div>
-    <button type="submit" class="auth-btn">Зарегистрироваться</button>
-    <div class="error" id="authError" style="color:var(--danger); text-align:center; font-size:13px; margin-top:10px;"></div>
-  </form>
-</div>
-
-<div id="app" hidden>
-  <header class="app-header">
-    <div class="brand">
-      <div class="brand-mark"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="var(--gold)" stroke-width="2"/><path d="M 35 75 L 35 25 L 65 75 L 65 25" fill="none" stroke="var(--gold)" stroke-width="6" stroke-linecap="round"/></svg></div>
-      NoglikTalk <span>v 1.109 water</span>
+    <div style="padding: 12px 20px; background: var(--panel2); font-size: 13px; border-bottom: 1px solid var(--border); display:flex; justify-content: space-between;">
+      <div>Монеты: <span id="achCoins" style="color:var(--gold2); font-weight:700;">0</span></div>
+      <div>Открыто: <span id="achCount" style="color:var(--gold2); font-weight:700;">0</span> / 20</div>
     </div>
-    <div class="header-avatar" id="myHeaderAvatar">N</div>
-  </header>
-
-  <div class="layout">
-    <aside class="sidebar">
-      <nav class="nav">
-        <div class="nav-label">Навигация</div>
-        <button class="nav-btn active" onclick="showScreen('home', this)">⌂ &nbsp; Главная</button>
-        <button class="nav-btn" onclick="showScreen('chats', this)">✉ &nbsp; Чаты</button>
-        <button class="nav-btn" onclick="showScreen('create', this)">＋ &nbsp; Создать</button>
-        <div class="nav-label">Аккаунт</div>
-        <button class="nav-btn" onclick="showScreen('profile', this)">⚙ &nbsp; Профиль</button>
-      </nav>
-    </aside>
-
-    <main class="main">
-      <div class="content-wrapper">
-        <section id="screen-home">
-          <div class="news-grid">
-            <div class="news-card" onclick="document.getElementById('updateModal').hidden=false">
-              <h3>1.109 water вышла</h3>
-              <p>Нажми, чтобы узнать что нового.</p>
-            </div>
-            <div class="news-card" style="cursor:default;">
-              <h3>Добро пожаловать в NoglikTalk</h3>
-              <p>Общайся, создавай и вдохновляйся.</p>
-            </div>
-          </div>
-          <div class="filters" id="filter-container">
-            <button class="filter active" onclick="filterCards('all', this)">Рекомендации</button>
-            <button class="filter" onclick="filterCards('system', this)">Системные</button>
-            <button class="filter" onclick="filterCards('popular', this)">Популярные</button>
-            <button class="filter" onclick="filterCards('game', this)">Игры</button>
-            <button class="filter" onclick="filterCards('new', this)">Новое</button>
-            <button class="filter" onclick="filterCards('people', this)">Люди</button>
-          </div>
-          <div id="characters-section">
-            <div class="section-title" id="chars-title">Персонажи</div>
-            <div class="character-grid" id="chars-grid"></div>
-          </div>
-          <div id="games-section" hidden>
-            <div class="section-title">Игры</div>
-            <div class="character-grid">
-              <div class="character-card card-char" data-category="game">
-                <div class="character-image-wrap"><img src="https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_00000000812c81f4ade4eebfef4084f4.png" class="character-img"></div>
-                <div class="character-body"><h3>Тёмный лес</h3><div class="character-desc">Квест-выживание.</div><div class="card-actions"><button class="btn primary" onclick="document.getElementById('gameScreen').hidden=false">Играть</button></div></div>
-              </div>
-            </div>
-          </div>
-          <div id="people-section" hidden>
-            <div class="section-title">Люди</div>
-            <div id="people-list"></div>
-          </div>
-        </section>
-
-        <section id="screen-chats" hidden>
-          <h2 class="screen-title" style="margin-top:0; color:var(--gold2);">Мои чаты</h2>
-          <div class="mode-switch" style="background:transparent; border-bottom:1px solid var(--border); border-radius:0; padding:0;">
-            <button class="mode-btn active" onclick="switchChatTab('chars', this)" style="border-bottom:2px solid var(--gold); border-radius:0;">Персонажи</button>
-            <button class="mode-btn" onclick="switchChatTab('games', this)" style="border-radius:0;">Игры</button>
-            <button class="mode-btn" onclick="switchChatTab('people', this)" style="border-radius:0;">Люди</button>
-          </div>
-          <div id="chat-list-chars"><div style="color:var(--muted); text-align:center; padding:20px;">Выберите персонажа на главной</div></div>
-          <div id="chat-list-games" hidden><div style="color:var(--muted); text-align:center; padding:20px;">Нет активных игр</div></div>
-          <div id="chat-list-people" hidden><div id="chat-people-list"></div></div>
-        </section>
-
-        <section id="screen-create" hidden>
-          <div class="mode-switch" id="editor-mode-switch">
-            <button class="mode-btn active" onclick="switchEditorMode('char', this)">Персонаж</button>
-            <button class="mode-btn" onclick="switchEditorMode('game', this)">Чат Игра</button>
-          </div>
-          <div id="editor-char-container">
-            <div class="step-switch">
-              <button class="step-btn active" onclick="switchCharStep(0, this)">Кто он?</button>
-              <button class="step-btn" onclick="switchCharStep(1, this)">Психика</button>
-              <button class="step-btn" onclick="switchCharStep(2, this)">Общение</button>
-            </div>
-            <div class="panel">
-              <h1 class="screen-title" style="text-align:center; margin-bottom:20px;">Новый персонаж</h1>
-              <div id="c-step-0">
-                <div class="avatar-upload-wrap"><label class="avatar-upload"><input type="file" accept="image/*" onchange="showCharAvatar(this)"><span class="plus-icon" id="charPlus">+</span><img id="charPreview" src="" alt=""></label></div>
-                <div class="field"><label>Имя *</label><input class="input" id="newCharName" placeholder="Имя"></div>
-                <div class="field"><label>Кто он?</label><input class="input" id="newCharTagline" placeholder="Краткое описание"></div>
-                <div class="field"><label>Приветствие</label><textarea class="textarea" id="newCharWelcome" rows="3" placeholder="Первое сообщение..."></textarea></div>
-              </div>
-              <div id="c-step-1" hidden>
-                <div class="field"><label>Характер *</label><textarea class="textarea" id="newCharPrompt" rows="8" placeholder="Опиши личность..."></textarea></div>
-                <div class="field"><label>Поведение</label><textarea class="textarea" id="newCharBehavior" rows="5" placeholder="Как он себя ведет?"></textarea></div>
-                <div class="field"><label>Отношение</label><textarea class="textarea" id="newCharAttitude" rows="5" placeholder="Как относится к собеседнику?"></textarea></div>
-              </div>
-              <div id="c-step-2" hidden>
-                <div class="field"><label>Стиль общения</label><textarea class="textarea" id="newCharStyle" rows="5" placeholder="Неформально, с юмором..."></textarea></div>
-                <div class="field"><label>Словечки</label><textarea class="textarea" id="newCharWords" rows="3" placeholder="Бро, кек..."></textarea></div>
-                <div class="field"><label>Фразы</label><textarea class="textarea" id="newCharPhrases" rows="3" placeholder="Это база!"></textarea></div>
-              </div>
-              <div style="display:flex; gap:10px; margin-top:15px;">
-                <button id="btn-prev-c" class="btn ghost" style="flex:1; display:none;" onclick="switchCharStep(document.cStep-1)">Назад</button>
-                <button id="btn-next-c" class="btn primary" style="flex:2;" onclick="switchCharStep(document.cStep+1)">Далее</button>
-                <button id="btn-sub-c" class="btn primary" style="flex:2; display:none;" onclick="saveCharacter()">Создать</button>
-              </div>
-            </div>
-          </div>
-          <div id="editor-game-container" hidden>
-            <div class="step-switch" id="gameStepSwitch">
-              <button type="button" class="step-btn active" data-gamestep="1">1. Игра</button>
-              <button type="button" class="step-btn" data-gamestep="2">2. Сюжет</button>
-              <button type="button" class="step-btn" data-gamestep="3">3. Переходы</button>
-            </div>
-            <div class="panel">
-              <div id="gameStep1"><h1 style="text-align: center; margin-bottom: 20px;">Настройка игры</h1><div class="field"><label>Название *</label><input class="input"></div></div>
-              <div id="gameStep2" hidden><h1 style="margin-bottom: 20px;">Сюжет</h1><textarea class="textarea" rows="6"></textarea></div>
-              <div id="gameStep3" hidden><h1 style="margin-bottom: 20px;">Переходы</h1><textarea class="textarea" rows="6"></textarea></div>
-              <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="button" class="btn ghost" id="prevGameStep" style="flex: 1; display: none;">← Назад</button>
-                <button type="button" class="btn primary" id="nextGameStep" style="flex: 2;">Далее</button>
-                <button type="button" class="btn primary" id="submitGameBtn" style="flex: 2; display: none;">Создать</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="screen-profile" hidden>
-          <div class="profile-header">
-            <div class="profile-avatar-wrap">
-              <div class="profile-avatar" id="profAvatarLetter">
-                N
-                <img src="" alt="" id="profAvatarImg">
-              </div>
-            </div>
-            <h2 class="profile-name" id="profName">Ngl</h2>
-            <div class="profile-stats" id="profile-stats-container"></div>
-            
-            <div style="width:100%; margin-top:30px; padding-top:20px; border-top:1px solid var(--border);">
-              <h3 style="margin:0 0 10px; font-size:14px; color:var(--gold2);">Настройки ИИ</h3>
-              <div class="field">
-                <label>Gemini API-ключ</label>
-                <input class="input" type="password" id="profileApiKey" placeholder="Вставь свой ключ сюда">
-              </div>
-              <button class="btn primary" style="width:100%; margin-top:10px;" onclick="saveApiKey()">Сохранить ключ</button>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
-  </div>
-
-  <nav class="bottom-nav">
-    <button class="active" onclick="showScreen('home', this)"><span>⌂</span>Главная</button>
-    <button onclick="showScreen('chats', this)"><span>✉</span>Чаты</button>
-    <button onclick="showScreen('create', this)"><span>＋</span>Создать</button>
-    <button onclick="showScreen('profile', this)"><span>⚙</span>Профиль</button>
-  </nav>
-</div>
-
-<div id="chatScreen" class="fullscreen-screen" hidden>
-  <div class="top-bar">
-    <button class="btn ghost" onclick="document.getElementById('chatScreen').hidden=true">←</button>
-    <div class="chat-avatar" id="chatHeaderAvatar" onclick="document.getElementById('charProfileModal').hidden=false"></div>
-    <div><h2 style="margin:0; font-size:16px;" id="chatHeaderName">Имя</h2><p style="margin:0; font-size:12px; color:var(--muted);">Готов к разговору</p></div>
-  </div>
-  <div class="messages" id="chatMessagesContainer"></div>
-  <div class="composer">
-    <textarea class="textarea" id="chatInput" rows="1" placeholder="Напиши сообщение..." style="border-radius:20px;"></textarea>
-    <button class="btn primary" style="width:46px; height:46px; border-radius:50%; padding:0;" onclick="sendChatMessage()">➤</button>
+    <div class="achievements-grid" id="achievementsGridContainer"></div>
   </div>
 </div>
 
-<!-- ЧАТ С ЧЕЛОВЕКОМ (ДОБАВЛЕН ПРОФИЛЬ ПО КЛИКУ НА АВАТАРКУ) -->
-<div id="peopleChatScreen" class="fullscreen-screen" hidden>
-  <div class="top-bar">
-    <button class="btn ghost" onclick="document.getElementById('peopleChatScreen').hidden=true">←</button>
-    <div class="chat-avatar" id="peopleChatHeaderAvatar" onclick="openPeopleProfile()"></div>
-    <div><h2 style="margin:0; font-size:16px;" id="peopleChatHeaderName">Имя</h2><p style="margin:0; font-size:12px; color:var(--muted);">В сети</p></div>
+<!-- ЭКРАН ПРОФИЛЯ ПЕРСОНАЖА -->
+<div id="charProfileScreen" class="fullscreen-screen" hidden>
+  <div class="char-prof-header">
+    <button class="btn" style="background:transparent; border:1px solid var(--border); border-radius:50%; width:44px; height:44px; padding:0;" onclick="document.getElementById('charProfileScreen').hidden=true">←</button>
   </div>
-  <div class="messages" id="peopleChatMessages"></div>
-  <div class="composer">
-    <textarea class="textarea" id="peopleChatInput" rows="1" placeholder="Напиши сообщение..." style="border-radius:20px;"></textarea>
-    <button class="btn primary" style="width:46px; height:46px; border-radius:50%; padding:0;" onclick="sendPeopleMessage()">➤</button>
-  </div>
-</div>
-
-<!-- МОДАЛКА ПРОФИЛЯ ЧЕЛОВЕКА -->
-<div id="peopleProfileModal" hidden style="position:fixed; inset:0; z-index:250; background:var(--bg); display:flex; flex-direction:column; padding:20px; overflow-y:auto;">
-  <div class="modal-top"><button class="close-modal" onclick="document.getElementById('peopleProfileModal').hidden=true">✕</button></div>
-  <div class="char-profile-inner">
-    <img id="peopleProfileAvatar" src="" class="char-profile-avatar">
-    <h2 class="char-profile-name" id="peopleProfileName">Имя</h2>
-    <div class="author-row" style="border:none; justify-content:center; gap:20px;">
-      <button id="followBtn" class="btn primary" style="width:auto; padding:10px 20px;" onclick="followUser()">Подписаться</button>
+  <div class="char-prof-content">
+    <div class="char-prof-avatar-wrap"><img id="profCharImg" src="" alt="" class="char-prof-avatar"></div>
+    <h2 id="profCharName" class="char-prof-name">Имя</h2>
+    <div id="profCharDesc" class="char-prof-desc">Описание...</div>
+    <div id="profCharAbout" class="char-about-text">Загрузка...</div>
+    <div class="char-prof-actions">
+      <button class="btn primary" id="profFollowBtn" style="padding: 12px 24px; border-radius: 20px;" onclick="this.classList.toggle('active'); this.textContent = this.classList.contains('active') ? 'Вы подписаны' : 'Подписаться'">Подписаться</button>
+      <button class="btn-circle" onclick="this.classList.toggle('active')"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
     </div>
-    <div style="color:var(--muted); text-align:center;">Пользователь NoglikTalk</div>
+    <div class="rating-container">
+      <input type="range" min="1" max="100" value="50" class="rating-slider" id="charRatingSlider" oninput="updateRatingValue(this.value)">
+      <div class="rating-value" id="charRatingValue">50</div>
+      <button class="btn-action-small" id="ratingActionBtn" onclick="toggleRatingAction()">
+        <svg id="ratingIconCheck" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        <svg id="ratingIconGear" viewBox="0 0 24 24" style="display:none;"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+      </button>
+    </div>
+    <div class="char-prof-stats">
+      <div class="char-stat-item"><div class="char-stat-val">0</div><div class="char-stat-label">Сообщений</div></div>
+      <div class="char-stat-item"><div class="char-stat-val">0</div><div class="char-stat-label">Собеседников</div></div>
+      <div class="char-stat-item"><div class="char-stat-val">0</div><div class="char-stat-label">Лайков</div></div>
+      <div class="char-stat-item"><div class="char-stat-val">0</div><div class="char-stat-label">Комментариев</div></div>
+    </div>
+    <button class="btn primary btn-comments" onclick="alert('Открытие комментариев в разработке')">Комментарии</button>
   </div>
 </div>
 
-<div id="charProfileModal" hidden>
-  <div class="modal-top"><button class="close-modal" onclick="document.getElementById('charProfileModal').hidden=true">✕</button></div>
-  <div class="char-profile-inner">
-    <img id="modalCharAvatar" src="" class="char-profile-avatar">
-    <h2 class="char-profile-name" id="modalCharName">Сократ</h2>
-    <div class="char-profile-desc" id="modalCharDesc"></div>
-    <div class="author-row">
-      <div class="author-name" id="modalCharAuthor">Автор: Noglik</div>
-      <button class="btn-like" onclick="this.classList.toggle('liked')"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
-      <button class="btn primary" style="width:auto; padding:8px 16px; font-size:13px;">Подписаться</button>
-    </div>
-    <div class="stats-grid">
-      <div class="stat-item"><div class="stat-val" id="modalStatDate">12.10.2026</div><div class="stat-label">Выпущен</div></div>
-      <div class="stat-item"><div class="stat-val" id="modalStatMsgs">0</div><div class="stat-label">Сообщений</div></div>
-      <div class="stat-item"><div class="stat-val" id="modalStatChats">0</div><div class="stat-label">Собеседников</div></div>
-      <div class="stat-item"><div class="stat-val" id="modalStatLikes">0</div><div class="stat-label">Лайков</div></div>
-    </div>
-    <button class="btn-write-author" title="Написать автору" onclick="alert('Функция в разработке')">
-      <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
-    </button>
-  </div>
-</div>
-
-<div id="updateModal" style="position:fixed; inset:0; z-index:300; background:var(--bg); display:flex; flex-direction:column; padding:20px; overflow-y:auto;" hidden>
+<!-- МОДАЛКИ -->
+<div id="updateModal" class="fullscreen-screen" hidden>
   <div class="modal-top"><button class="close-modal" onclick="document.getElementById('updateModal').hidden=true">✕</button></div>
-  <div class="char-profile-inner" style="align-items:flex-start;">
-    <h2 style="color:var(--gold2); margin:0 0 16px;">Вышла версия 1.109 water</h2>
-    <ul style="color:var(--muted); line-height:1.8; padding-left:20px; font-size:15px;">
-      <li>Исправлены баги с отправкой сообщений.</li>
-      <li>Теперь можно подписываться на людей.</li>
-      <li>Убран синий фон при нажатии.</li>
+  <div class="modal-inner">
+    <h2 style="color:var(--gold2); margin:0 0 16px;">Вышла версия 1.157 Achievement</h2>
+    <ul style="color:var(--text); line-height:1.8; padding-left:20px; font-size:15px;">
+      <li><b>Лиги:</b> 5 лиг по 5 подрангов. Прогресс за RP.</li>
+      <li><b>Профиль:</b> Новый дизайн с плашкой лиги и монетами.</li>
+      <li><b>Ачивки:</b> 20 достижений, которые дают монеты.</li>
+      <li><b>Шрифты:</b> Выбор из 3 вариантов (Классика, Современный, Техно).</li>
+      <li><b>Мульти-ИИ:</b> Поддержка Gemini, Groq, OpenRouter.</li>
     </ul>
   </div>
 </div>
 
-<div id="gameScreen" class="fullscreen-screen" hidden>
-  <div class="top-bar">
-    <button class="btn ghost" onclick="document.getElementById('gameScreen').hidden=true">←</button>
-    <div style="width:40px; height:40px; border-radius:50%; overflow:hidden;"><img src="https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_00000000812c81f4ade4eebfef4084f4.png" style="width:100%;height:100%;object-fit:cover;"></div>
-    <div><h2 style="margin:0; font-size:16px;">Тёмный лес</h2><p style="margin:0; font-size:12px; color:var(--muted);">Ход 1</p></div>
-  </div>
-  <div class="messages"><div class="msg assistant">Ты просыпаешься на сырой земле. Над головой — плотный полог из чёрных ветвей. Рядом — сломанный фонарь...</div></div>
-  <div style="padding:16px; display:flex; flex-direction:column; gap:10px; background:var(--bg);">
-    <button class="btn primary">Поднять фонарь и пойти на звук</button>
-    <button class="btn">Осмотреть карту и искать тропу</button>
+<div id="colorModal" class="fullscreen-screen" hidden>
+  <div class="modal-top"><button class="close-modal" onclick="document.getElementById('colorModal').hidden=true">✕</button></div>
+  <div class="modal-inner">
+    <h2 style="color:var(--gold2); margin:0 0 8px;">Настройки внешнего вида</h2>
+    
+    <div class="field" style="margin-bottom: 20px;">
+      <label>Шрифт приложения</label>
+      <select id="fontSelect" onchange="changeFont(this.value)">
+        <option value="'Inter', sans-serif">Современный (Inter)</option>
+        <option value="'Playfair Display', serif">Классика (Playfair)</option>
+        <option value="'JetBrains Mono', monospace">Техно (JetBrains)</option>
+      </select>
+    </div>
+
+    <p style="color:var(--muted); font-size:13px; margin:0 0 20px;">Настройка цветов:</p>
+    
+    <div class="color-row"><label>Общий фон (bg)</label><input type="text" id="input-bg" value="#071c16"></div>
+    <div class="color-row"><label>Шапка (header)</label><input type="text" id="input-header" value="#0f2e24"></div>
+    <div class="color-row"><label>Навигация (nav)</label><input type="text" id="input-nav" value="#071c16"></div>
+    <div class="color-row"><label>Карточки (panel)</label><input type="text" id="input-panel" value="#0d2920"></div>
+    <div class="color-row"><label>Поля (panel2)</label><input type="text" id="input-panel2" value="#12352a"></div>
+    <div class="color-row"><label>Акцент (gold)</label><input type="text" id="input-gold" value="#d9b66d"></div>
+    <div class="color-row"><label>Текст (text)</label><input type="text" id="input-text" value="#f5f2e9"></div>
+    <div class="color-row"><label>Второст. текст (muted)</label><input type="text" id="input-muted" value="#a6b8ad"></div>
+    <div class="color-row"><label>Границы (border)</label><input type="text" id="input-border" value="rgba(217,182,109,.15)"></div>
+
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button class="btn primary" style="flex:1;" onclick="applyTheme()">Применить</button>
+      <button class="btn" style="flex:1; background:var(--panel2);" onclick="resetTheme()">Сбросить</button>
+    </div>
   </div>
 </div>
 
+<!-- ЭКРАН ЧАТА / ИГРЫ -->
+<div id="chatScreen" class="fullscreen-screen" hidden>
+  <div class="top-bar" style="padding: 12px 16px; display:flex; align-items:center; gap:12px; background:var(--bg); border-bottom:1px solid var(--border);">
+    <button class="btn" style="background:transparent; border:none; font-size:20px; padding:0; color:var(--text);" onclick="document.getElementById('chatScreen').hidden=true">←</button>
+    <div style="width:44px; height:44px; border-radius:50%; overflow:hidden; border:1px solid var(--gold); flex-shrink:0; cursor:pointer;" onclick="openCharProfileFromChat()">
+      <img id="chatHeaderImg" src="" alt="" style="width:100%; height:100%; object-fit:cover;">
+    </div>
+    <div style="flex:1; min-width: 0;">
+      <h2 style="margin:0; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="chatHeaderName">Имя</h2>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button class="btn small" style="background:transparent; color:var(--gold2); font-weight:bold; padding:6px 8px; font-size:12px;" onclick="this.textContent = this.textContent === 'Подписаться' ? 'Вы подписаны' : 'Подписаться'">Подписаться</button>
+      <button class="btn-circle" style="width:36px; height:36px; border:none; background:transparent;" onclick="this.classList.toggle('active')">
+        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      </button>
+      <button class="btn small" style="background:transparent; color:var(--muted); padding:6px 8px; font-size:12px;" onclick="alert('Комменты')">Комментарии</button>
+    </div>
+  </div>
+  <div class="messages" id="chatMessagesContainer"></div>
+  <div class="composer" id="chatInputArea" style="flex-direction: row;">
+    <input class="input" id="chatInput" placeholder="Напиши сообщение..." style="border-radius:20px;" onkeydown="if(event.key==='Enter') handleSendChatMessage()">
+    <button class="btn primary" style="width:46px; height:46px; border-radius:50%; padding:0;" onclick="handleSendChatMessage()">➤</button>
+  </div>
+  <div id="gameControls"></div>
+</div>
+
+<!-- ШАПКА -->
+<header class="app-header" id="mainHeader">
+  <div class="brand"><div class="header-avatar" style="border:none; background:transparent; font-size:20px; color:var(--gold);">N</div>NoglikTalk</div>
+  <div class="search-wrapper">
+    <div class="search-input-wrapper">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <input type="text" id="searchInput" class="search-input" placeholder="Поиск..." oninput="handleSearch()">
+    </div>
+  </div>
+  <div class="header-avatar" id="headerAvatar">U</div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <nav class="nav">
+      <div class="nav-label">Навигация</div>
+      <button class="nav-btn active" onclick="showScreen('home', this)">Главная</button>
+      <button class="nav-btn" onclick="showScreen('chats', this)">Чаты</button>
+      <button class="nav-btn" onclick="showScreen('create', this)">Создать</button>
+      <div class="nav-label">Аккаунт</div>
+      <button class="nav-btn" onclick="showScreen('league', this)">Лига</button>
+      <button class="nav-btn" onclick="showScreen('profile', this)">Профиль</button>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="content-wrapper">
+      <section id="screen-home">
+        <div class="news-grid">
+          <div class="news-card" onclick="document.getElementById('updateModal').hidden=false"><h3>1.157 Achievement</h3><p>Лиги, ачивки, монеты и выбор ИИ.</p></div>
+          <div class="news-card"><h3>Добро пожаловать</h3><p>Общайся, создавай и вдохновляйся.</p></div>
+        </div>
+        <div class="filters" id="filter-container">
+          <button class="filter active" onclick="filterCards('all', this)">Рекомендации</button>
+          <button class="filter" onclick="filterCards('system', this)">Системные</button>
+          <button class="filter" onclick="filterCards('popular', this)">Популярные</button>
+          <button class="filter" onclick="filterCards('game', this)">Игры</button>
+          <button class="filter" onclick="filterCards('new', this)">Новое</button>
+        </div>
+        <div class="section-title" id="chars-title">Персонажи</div>
+        
+        <div class="character-grid" id="chars-grid">
+          <div class="character-card card-char" data-category="system" data-title="Сократ" onclick="openChat('Сократ', 'https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_00000000356881f48a43afc0e32e8bb1.png', 'Философ, который помогает находить ответы.', 'Здравствуй, странник. Скажи мне, что привело тебя ко мне и какую мысль мы сегодня подвергнем сомнению?', 'Сократ — древнегреческий философ, который ищет истину через диалог.', 'socrat')">
+            <div class="character-image-wrap"><img src="https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_00000000356881f48a43afc0e32e8bb1.png" alt="Сократ" class="character-img"></div>
+            <div class="character-body"><h3>Сократ</h3><div class="character-desc">Философ.</div><div class="card-actions"><button class="btn primary" onclick="event.stopPropagation(); openChat('Сократ', 'https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_00000000356881f48a43afc0e32e8bb1.png', 'Философ, который помогает находить ответы.', 'Здравствуй, странник. Скажи мне, что привело тебя ко мне и какую мысль мы сегодня подвергнем сомнению?', 'Сократ — древнегреческий философ, который ищет истину через диалог.', 'socrat')">Общаться</button></div></div>
+          </div>
+          <div class="character-card card-char" data-category="popular" data-title="Братюня" onclick="openChat('Братюня', 'https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000026308210bd3e70e4c1c72dc3.png', 'Энергичный помощник и напарник.', 'Здорово, бро!', 'Братюня — это ваш цифровой друг.', 'bratunya')">
+            <div class="character-image-wrap"><img src="https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000026308210bd3e70e4c1c72dc3.png" alt="Братюня" class="character-img"></div>
+            <div class="character-body"><h3>Братюня</h3><div class="character-desc">Помощник.</div><div class="card-actions"><button class="btn primary" onclick="event.stopPropagation(); openChat('Братюня', 'https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000026308210bd3e70e4c1c72dc3.png', 'Энергичный помощник и напарник.', 'Здорово, бро!', 'Братюня — это ваш цифровой друг.', 'bratunya')">Общаться</button></div></div>
+          </div>
+          <div class="character-card card-char" data-category="popular" data-title="Сталин" onclick="openChat('Сталин', 'https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000056ac81f4b9167adb3b61206f.png', 'Историческая ролевая интерпретация.', 'Здравствуйте.', 'Исторически стилизованный персонаж.', 'stalin')">
+            <div class="character-image-wrap"><img src="https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000056ac81f4b9167adb3b61206f.png" alt="Сталин" class="character-img"></div>
+            <div class="character-body"><h3>Сталин</h3><div class="character-desc">История.</div><div class="card-actions"><button class="btn primary" onclick="event.stopPropagation(); openChat('Сталин', 'https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000056ac81f4b9167adb3b61206f.png', 'Историческая ролевая интерпретация.', 'Здравствуйте.', 'Исторически стилизованный персонаж.', 'stalin')">Общаться</button></div></div>
+          </div>
+          <div class="character-card card-char" data-category="popular" data-title="Пушкин" onclick="openChat('Пушкин', 'https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000061f4820abb3f3b2e616bda30.png', 'Литература, ирония, история.', 'Приветствую!', 'Литературный собеседник.', 'pushkin')">
+            <div class="character-image-wrap"><img src="https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000061f4820abb3f3b2e616bda30.png" alt="Пушкин" class="character-img"></div>
+            <div class="character-body"><h3>Пушкин</h3><div class="character-desc">Литература.</div><div class="card-actions"><button class="btn primary" onclick="event.stopPropagation(); openChat('Пушкин', 'https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000061f4820abb3f3b2e616bda30.png', 'Литература, ирония, история.', 'Приветствую!', 'Литературный собеседник.', 'pushkin')">Общаться</button></div></div>
+          </div>
+          <div class="character-card card-char" data-category="popular" data-title="Лавинья" onclick="openChat('Лавинья', 'https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000030a48211ad9240c36185feb6.png', 'Персонаж для живого общения.', 'Привет-привет!', 'Милая, обаятельная и хитроватая девушка.', 'lavinya')">
+            <div class="character-image-wrap"><img src="https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000030a48211ad9240c36185feb6.png" alt="Лавинья" class="character-img"></div>
+            <div class="character-body"><h3>Лавинья</h3><div class="character-desc">Общение.</div><div class="card-actions"><button class="btn primary" onclick="event.stopPropagation(); openChat('Лавинья', 'https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_0000000030a48211ad9240c36185feb6.png', 'Персонаж для живого общения.', 'Привет-привет!', 'Милая, обаятельная и хитроватая девушка.', 'lavinya')">Общаться</button></div></div>
+          </div>
+          <div class="character-card card-char" data-category="system" data-title="Обычный ИИ" onclick="openChat('Обычный ИИ', 'https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_000000007068824385c56cb176258343.png', 'Универсальный помощник.', 'Привет!', 'Компетентный универсальный помощник.', 'obichniy_ii')">
+            <div class="character-image-wrap"><img src="https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_000000007068824385c56cb176258343.png" alt="Обычный ИИ" class="character-img"></div>
+            <div class="character-body"><h3>Обычный ИИ</h3><div class="character-desc">Помощник.</div><div class="card-actions"><button class="btn primary" onclick="event.stopPropagation(); openChat('Обычный ИИ', 'https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_000000007068824385c56cb176258343.png', 'Универсальный помощник.', 'Привет!', 'Компетентный универсальный помощник.', 'obichniy_ii')">Общаться</button></div></div>
+          </div>
+          <div class="character-card card-char" data-category="game" data-title="Тёмный лес" onclick="startGame()">
+            <div class="character-image-wrap"><img src="https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_00000000812c81f4ade4eebfef4084f4.png" alt="Тёмный лес" class="character-img"></div>
+            <div class="character-body"><h3>Тёмный лес</h3><div class="character-desc">Квест-выживание.</div><div class="card-actions"><button class="btn primary" onclick="event.stopPropagation(); startGame()">Играть</button></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-chats" hidden>
+        <h2 class="section-title" style="margin-top:0;">Мои чаты</h2>
+        <div class="chat-tabs">
+          <button class="mode-btn active" onclick="switchChatTab('chars', this)">Персонажи</button>
+          <button class="mode-btn" onclick="switchChatTab('games', this)">Игры</button>
+          <button class="mode-btn" onclick="switchChatTab('people', this)">Люди</button>
+        </div>
+        <div id="chat-list-chars"><div class="placeholder-screen"><p>Выберите персонажа на главной, чтобы начать чат.</p></div></div>
+        <div id="chat-list-games" hidden><div class="placeholder-screen"><p>Здесь будут ваши игры.</p></div></div>
+        <div id="chat-list-people" hidden><div class="placeholder-screen"><p>Здесь будут чаты с людьми.</p></div></div>
+      </section>
+
+      <section id="screen-league" hidden>
+        <h2 class="section-title" style="margin-top:0;">Путь к Легенде</h2>
+        
+        <div class="player-progress">
+          <div class="progress-title"><span>Твой текущий ранг</span><span id="mainRPText">0 RP</span></div>
+          <div class="rank-info">
+            <div class="rank-icon" id="mainRankIcon"></div>
+            <div>
+              <div class="rank-name" id="mainRankName">Бронза V</div>
+              <div class="rank-sub" id="mainRankTitle">Путник</div>
+            </div>
+          </div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="mainProgressFill"></div></div>
+          <div class="progress-numbers">
+            <span id="mainMinRP">0 RP</span>
+            <span id="mainNextText">До Бронзы IV: 750 RP</span>
+            <span id="mainMaxRP">750 RP</span>
+          </div>
+        </div>
+
+        <div class="league-list" id="leagueListContainer"></div>
+      </section>
+
+      <section id="screen-create" hidden>
+        <div class="mode-switch" id="create-mode-switch">
+          <button class="mode-btn active" onclick="switchCreateMode('char', this)">Персонаж</button>
+          <button class="mode-btn" onclick="switchCreateMode('game', this)">Чат Игра</button>
+        </div>
+
+        <div id="create-char-editor">
+          <div class="step-switch">
+            <button class="step-btn active" onclick="switchCharStep(0, this)">Кто он?</button>
+            <button class="step-btn" onclick="switchCharStep(1, this)">Психика</button>
+            <button class="step-btn" onclick="switchCharStep(2, this)">Общение</button>
+          </div>
+          
+          <div class="panel">
+            <h1 class="section-title" style="text-align:center; margin-bottom:20px;">Новый персонаж</h1>
+            
+            <div id="c-step-0">
+              <div class="avatar-upload-wrap"><label class="avatar-upload"><span class="plus-icon">+</span></label></div>
+              <div class="field"><label>Имя *</label><input class="input" id="newCharName" placeholder="Имя"></div>
+              <div class="field"><label>Кто он?</label><input class="input" id="newCharTagline" placeholder="Краткое описание"></div>
+              <div class="field"><label>Приветствие</label><textarea class="textarea" id="newCharWelcome" rows="3" placeholder="Первое сообщение..."></textarea></div>
+            </div>
+
+            <div id="c-step-1" hidden>
+              <div class="field"><label>Характер *</label><textarea class="textarea" id="newCharPersonality" rows="8" placeholder="Опиши личность..."></textarea></div>
+              <div class="field"><label>Поведение</label><textarea class="textarea" id="newCharBehavior" rows="5" placeholder="Как он себя ведет?"></textarea></div>
+              <div class="field"><label>Отношение</label><textarea class="textarea" id="newCharRelation" rows="5" placeholder="Как относится к собеседнику?"></textarea></div>
+            </div>
+
+            <div id="c-step-2" hidden>
+              <div class="field"><label>Стиль общения</label><textarea class="textarea" id="newCharStyle" rows="5" placeholder="Неформально, с юмором..."></textarea></div>
+              <div class="field"><label>Словечки</label><textarea class="textarea" id="newCharSlang" rows="3" placeholder="Бро, кек..."></textarea></div>
+              <div class="field"><label>Фразы</label><textarea class="textarea" id="newCharPhrases" rows="3" placeholder="Это база!"></textarea></div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:15px;">
+              <button id="btn-prev-c" class="btn ghost" style="flex:1; display:none;" onclick="switchCharStep(currentCharStep-1)">Назад</button>
+              <button id="btn-next-c" class="btn primary" style="flex:2;" onclick="switchCharStep(currentCharStep+1)">Далее</button>
+              <button id="btn-sub-c" class="btn primary" style="flex:2; display:none;" onclick="onPublishCharacter()">Создать</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="create-game-editor" hidden>
+          <div class="game-type-switch">
+            <button class="type-btn active" onclick="switchGameType('action', this)"><svg viewBox="0 0 24 24"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S18.67 9 19.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg><span>Экшен</span></button>
+            <button class="type-btn" onclick="switchGameType('quiz', this)"><svg viewBox="0 0 24 24"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg><span>Викторина</span></button>
+            <button class="type-btn" onclick="switchGameType('mafia', this)"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v-2h-2v2zm0-4h2V7h-2v6z"/></svg><span>Мафия</span></button>
+          </div>
+
+          <div id="editor-action">
+            <div class="help-box"><b>Создай свой квест</b>Игрок читает текст и нажимает на кнопки. Каждая кнопка ведет на свою сцену.</div>
+            <div class="block-card"><div class="field"><label>Название игры *</label><input class="input" placeholder="Побег из Тёмного леса"></div></div>
+            <h2 class="section-title">Сцены <button class="btn outline small" onclick="addNewScene()">+ Добавить</button></h2>
+            <div id="scenes-container">
+              <div class="block-card scene-block">
+                <div class="block-header"><h4>Сцена 1 (Старт)</h4></div>
+                <div class="field"><textarea class="textarea" rows="3" placeholder="Ты просыпаешься в тёмной комнате..."></textarea></div>
+                <div class="choice-row"><input type="text" placeholder="Текст кнопки" value="Выйти в коридор"><select><option>К Сцене 2</option><option>К Сцене 3</option></select><button class="delete-btn" onclick="this.parentElement.remove()">✕</button></div>
+                <button class="btn outline small" style="width: 100%;" onclick="addChoiceToScene(this)">+ Добавить кнопку</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="editor-quiz" hidden>
+            <div class="help-box"><b>Проверь знания</b>Игрок видит вопрос и 4 варианта. Выбирает правильный — идет дальше.</div>
+            <div class="block-card"><div class="field"><label>Название викторины *</label><input class="input" placeholder="Знаток Истории"></div></div>
+            <h2 class="section-title">Вопросы <button class="btn outline small" onclick="addNewQuestion()">+ Добавить</button></h2>
+            <div id="questions-container">
+              <div class="block-card question-block">
+                <div class="block-header"><h4>Вопрос 1</h4><button class="delete-btn" onclick="this.closest('.question-block').remove()">✕</button></div>
+                <div class="field"><input class="input" placeholder="Вопрос..."></div>
+                <label style="font-size:12px; color:var(--gold2); display:block; margin-bottom:12px; font-weight:600;">Отметьте правильный ответ:</label>
+                <div class="quiz-option"><input type="radio" name="q1"><input class="input" type="text" placeholder="Вариант 1"></div>
+                <div class="quiz-option"><input type="radio" name="q1"><input class="input" type="text" placeholder="Вариант 2"></div>
+                <div class="quiz-option"><input type="radio" name="q1"><input class="input" type="text" placeholder="Вариант 3"></div>
+                <div class="quiz-option"><input type="radio" name="q1"><input class="input" type="text" placeholder="Вариант 4"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="editor-mafia" hidden>
+            <div class="help-box"><b>Раскрой преступление</b>Игрок изучает улики и подозреваемых, затем должен выбрать, кто преступник.</div>
+            <div class="block-card"><div class="field"><label>Название дела *</label><input class="input" placeholder="Убийство в особняке"></div><div class="field"><label>Вступление</label><textarea class="textarea" rows="2" placeholder="Этой ночью убили дворецкого..."></textarea></div></div>
+            <h2 class="section-title">Подозреваемые <button class="btn outline small" onclick="addNewSuspect()">+ Добавить</button></h2>
+            <div id="suspects-container">
+              <div class="block-card suspect-block">
+                <div class="block-header"><h4>Подозреваемый 1</h4><button class="delete-btn" onclick="this.closest('.suspect-block').remove()">✕</button></div>
+                <div class="field"><input class="input" placeholder="Имя"></div>
+                <div class="field"><textarea class="textarea" rows="2" placeholder="Алиби / Описание..."></textarea></div>
+              </div>
+            </div>
+            <h2 class="section-title">Улики <button class="btn outline small" onclick="addNewClue()">+ Добавить</button></h2>
+            <div id="clues-container"><div class="block-card clue-block"><div class="field"><input class="input" placeholder="Например: Нож с гравировкой в кухне"></div></div></div>
+            <div class="block-card" style="border-color: var(--gold); background: rgba(217,182,109,0.05);"><div class="field"><label style="color:var(--gold2); font-weight:bold; font-size: 15px;">Кто преступник?</label><select><option>Подозреваемый 1</option></select></div></div>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;">
+            <button class="btn" style="flex: 1; background: var(--panel2);" onclick="alert('Черновик сохранён')">Черновик</button>
+            <button class="btn primary" style="flex: 2;" onclick="onPublishGame()">Опубликовать</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-profile" hidden>
+        <div class="profile-header">
+          <div class="profile-avatar" id="profileAvatarLetter">U</div>
+          <h2 class="profile-name" id="profileUsername">Пользователь</h2>
+          
+          <div style="width:100%; margin: 10px 0 20px; background:var(--panel); border:1px solid var(--gold); border-radius:16px; padding:16px; text-align:center;">
+            <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Твой ранг</div>
+            <div style="font-size:24px; font-weight:900; color:var(--gold2); margin: 5px 0; display:flex; justify-content:center; align-items:center; gap:8px;">
+              <span id="profileLeagueIcon" style="width:24px; height:24px;"></span>
+              <span id="profileLeagueName">Бронза V</span>
+            </div>
+            <div style="width:100%; height:6px; background:var(--bg); border-radius:3px; overflow:hidden; margin-bottom:5px;">
+              <div id="profileLeagueProgress" style="height:100%; width:0%; background:linear-gradient(90deg, #d9b66d, #f0d99b); transition: width 0.5s ease-out;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--muted);">
+              <span id="profileRPText">0 RP</span>
+              <span id="profileNextLeagueText">До Бронзы IV: 750 RP</span>
+            </div>
+          </div>
+
+          <div class="profile-stats">
+            <div><div style="font-size:20px; font-weight:700;" id="profileFollowingCount">0</div><div style="font-size:11px; color:var(--muted);">ПОДПИСКИ</div></div>
+            <div><div style="font-size:20px; font-weight:700;" id="profileSubsCount">0</div><div style="font-size:11px; color:var(--muted);">ПОДПИСЧИКИ</div></div>
+            <div><div style="font-size:20px; font-weight:700;" id="profileMsgCount">0</div><div style="font-size:11px; color:var(--muted);">СООБЩЕНИЯ</div></div>
+            <div><div style="font-size:20px; font-weight:700; color:var(--gold2);" id="profileCoinCount">0</div><div style="font-size:11px; color:var(--muted);">МОНЕТЫ</div></div>
+          </div>
+          <button class="btn" style="width:100%; margin-top:20px; background:var(--panel2); color:var(--gold2);" onclick="document.getElementById('colorModal').hidden=false">Настройки внешнего вида</button>
+          <button class="btn-achievements" onclick="openAchievements()">
+            <span>Достижения</span>
+            <span id="profileAchCountBadge" style="color:var(--gold2);">0 / 20</span>
+          </button>
+          
+          <div style="width:100%; margin-top:30px; padding-top:20px; border-top:1px solid var(--border);">
+            <h3 style="margin:0 0 10px; font-size:14px; color:var(--gold2);">Настройки ИИ</h3>
+            
+            <div class="field">
+              <label>Выбери провайдера</label>
+              <select id="aiProviderSelect">
+                <option value="gemini">Google Gemini</option>
+                <option value="groq">Groq (Llama 3)</option>
+                <option value="openrouter">OpenRouter</option>
+              </select>
+            </div>
+
+            <div class="field"><label id="aiKeyLabel">Gemini API-ключ</label><input class="input" type="password" id="aiKeyInput" placeholder="Вставь свой ключ сюда"></div>
+            <button class="btn primary" style="width:100%; margin-top:10px;" onclick="saveAiSettings()">Сохранить ключ</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<nav class="bottom-nav">
+  <button class="active" onclick="showScreen('home', this)"><span>⌂</span>Главная</button>
+  <button onclick="showScreen('chats', this)"><span>✉</span>Чаты</button>
+  <button onclick="showScreen('create', this)"><span>＋</span>Создать</button>
+  <button onclick="showScreen('league', this)"><span>🏆</span>Лига</button>
+  <button onclick="showScreen('profile', this)"><span>⚙</span>Профиль</button>
+</nav>
+
 <script>
+  // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
   let token = localStorage.getItem("socium_token") || null;
   let myUser = null;
-  let apiKey = localStorage.getItem("gemini_key") || "";
-  let allCharacters = [];
-  let currentChatChar = null;
-  let currentPeopleChat = null;
-  let currentPeopleUserId = null;
+  let currentProvider = localStorage.getItem("ai_provider") || "gemini";
+  let currentCharId = null;
+  let chatHistory = [];
 
+  const gameState = JSON.parse(localStorage.getItem("noglik_game_state") || '{"messagesCount":0,"createdCharsCount":0,"createdGamesCount":0}');
+
+  function saveGameState() {
+    localStorage.setItem("noglik_game_state", JSON.stringify(gameState));
+  }
+
+  // ==================== API ====================
   async function api(url, method = "GET", body = null) {
     const headers = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = "Bearer " + token;
@@ -416,299 +660,603 @@ button:active, .filter:active, .nav-btn:active, .bottom-nav button:active, .mode
     return data;
   }
 
-  let regAvatarData = "";
-  function showRegAvatar(input) {
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        regAvatarData = e.target.result;
-        document.getElementById('regAvatarImg').src = e.target.result;
-        document.getElementById('regAvatarImg').style.display = 'block';
-        document.getElementById('regAvatarPlus').style.display = 'none';
-      };
-      reader.readAsDataURL(input.files[0]);
-    }
-  }
-
-  document.getElementById("regForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const u = document.getElementById("regUsername").value.trim();
-    const p = document.getElementById("regPassword").value;
-    const err = document.getElementById("authError");
-    err.textContent = "";
-    if (u.length < 3) return err.textContent = "Ник от 3 символов";
-    if (p.length < 8) return err.textContent = "Пароль от 8 символов";
-    try {
-      await api("/api/register", "POST", { username: u, password: p, avatar: regAvatarData });
-      const loginData = await api("/api/login", "POST", { username: u, password: p });
-      token = loginData.token;
-      myUser = loginData.user;
-      localStorage.setItem("socium_token", token);
-      document.getElementById("authScreen").hidden = true;
-      document.getElementById("app").hidden = false;
-      initApp();
-    } catch (ex) { err.textContent = ex.message; }
-  });
-
-  function loadApiKeyToInput() {
-    const input = document.getElementById("profileApiKey");
-    if (input) input.value = localStorage.getItem("gemini_key") || "";
-  }
-
-  function saveApiKey() {
-    const key = document.getElementById("profileApiKey").value.trim();
-    localStorage.setItem("gemini_key", key);
-    apiKey = key;
-    alert("API-ключ сохранён!");
-  }
-
-  async function initApp() {
-    document.getElementById("myHeaderAvatar").textContent = myUser.username[0].toUpperCase();
-    if (myUser.avatar) {
-      document.getElementById("myHeaderAvatar").innerHTML = `<img src="${myUser.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-    }
-    await loadCharacters();
-    loadProfileStats();
-  }
-
-  async function loadCharacters() {
-    try {
-      allCharacters = await api("/api/characters");
-      renderCharacters(allCharacters);
-    } catch (e) { console.error(e); }
-  }
-
-  async function loadPeople() {
-    try {
-      const users = await api("/api/users");
-      const list = document.getElementById("people-list");
-      list.innerHTML = "";
-      
-      const chatList = document.getElementById("chat-people-list");
-      chatList.innerHTML = "";
-      
-      if (users.length === 0) {
-        list.innerHTML = "<div style='color:var(--muted); padding:10px;'>Пока нет других пользователей</div>";
-        return;
-      }
-
-      users.forEach(u => {
-        const div = document.createElement("div");
-        div.className = "user-card";
-        div.style = "background:var(--panel); border-radius:12px; padding:12px; display:flex; align-items:center; gap:12px; margin-bottom:8px; border:1px solid var(--border);";
-        
-        const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;">` : u.username[0].toUpperCase();
-        div.innerHTML = `
-          <div class="header-avatar" style="width:44px; height:44px; font-size:18px;">${av}</div>
-          <div style="flex:1;">
-            <div style="font-weight:700;">${u.username}</div>
-            <div style="font-size:12px; color:var(--muted);">Нажми, чтобы написать</div>
-          </div>
-        `;
-        div.onclick = () => openPeopleChat(u.id, u.username, u.avatar);
-        list.appendChild(div);
-      });
-    } catch (e) { console.error(e); }
-  }
-
-  function renderCharacters(chars) {
-    const grid = document.getElementById("chars-grid");
-    grid.innerHTML = "";
-    chars.forEach(c => {
-      const card = document.createElement("div");
-      card.className = "character-card card-char";
-      card.dataset.category = c.category;
-      const img = c.avatar || "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_000000007068824385c56cb176258343.png";
-      card.innerHTML = `
-        <div class="character-image-wrap"><img src="${img}" class="character-img"></div>
-        <div class="character-body">
-          <h3>${c.name}</h3>
-          <div class="character-desc">${c.tagline || "Персонаж"}</div>
-          <div class="card-actions"><button class="btn primary" onclick="openChat('${c.id}')">Общаться</button></div>
-        </div>
-      `;
-      grid.appendChild(card);
-    });
-  }
-
-  async function loadProfileStats() {
-    try {
-      const stats = await api("/api/me");
-      document.getElementById("profName").textContent = stats.username;
-      const container = document.getElementById("profile-stats-container");
-      container.innerHTML = `
-        <div><div style="font-size:20px; font-weight:700;">${stats.following}</div><div style="font-size:11px; color:var(--muted);">ПОДПИСКИ</div></div>
-        <div><div style="font-size:20px; font-weight:700;">${stats.followers}</div><div style="font-size:11px; color:var(--muted);">ПОДПИСЧИКИ</div></div>
-        <div><div style="font-size:20px; font-weight:700;">${stats.likes}</div><div style="font-size:11px; color:var(--muted);">ЛАЙКИ</div></div>
-        <div><div style="font-size:20px; font-weight:700;">${stats.messages_count}</div><div style="font-size:11px; color:var(--muted);">СООБЩЕНИЯ</div></div>
-        <div><div style="font-size:20px; font-weight:700;">${stats.chats_count}</div><div style="font-size:11px; color:var(--muted);">ЧАТЫ</div></div>
-      `;
-    } catch (e) { console.error(e); }
-  }
-
-  async function openChat(charId) {
-    currentChatChar = allCharacters.find(c => c.id === charId);
-    if (!currentChatChar) return;
-    document.getElementById("chatHeaderName").textContent = currentChatChar.name;
-    document.getElementById("chatHeaderAvatar").innerHTML = `<img src="${currentChatChar.avatar || ''}">`;
-    document.getElementById("chatMessagesContainer").innerHTML = "";
-    try {
-      const stats = await api(`/api/character_stats/${charId}`);
-      document.getElementById("modalCharName").textContent = currentChatChar.name;
-      document.getElementById("modalCharDesc").textContent = currentChatChar.tagline || "Описание отсутствует.";
-      document.getElementById("modalCharAvatar").src = currentChatChar.avatar;
-      document.getElementById("modalCharAuthor").textContent = "Автор: " + (currentChatChar.author || "Noglik");
-      document.getElementById("modalStatMsgs").textContent = stats.total_messages;
-      document.getElementById("modalStatChats").textContent = stats.unique_users;
-      document.getElementById("modalStatLikes").textContent = stats.likes_count;
-    } catch (e) {}
-    document.getElementById("chatScreen").hidden = false;
-  }
-
-  async function sendChatMessage() {
-    const input = document.getElementById("chatInput");
-    const text = input.value.trim();
-    if (!text || !currentChatChar) return;
-    input.value = "";
-    const box = document.getElementById("chatMessagesContainer");
-    box.innerHTML += `<div class="msg user">${text}</div>`;
-    box.scrollTop = box.scrollHeight;
-    try {
-      const res = await api("/chat", "POST", { api_key: apiKey, character_id: currentChatChar.id, messages: [{ role: "user", content: text }] });
-      box.innerHTML += `<div class="msg assistant">${res.reply}</div>`;
-    } catch (e) {
-      box.innerHTML += `<div class="msg assistant" style="color:var(--danger)">Ошибка: ${e.message}</div>`;
-    }
-    box.scrollTop = box.scrollHeight;
-  }
-
-  async function openPeopleChat(userId, userName, userAvatar) {
-    currentPeopleChat = userId;
-    currentPeopleUserId = userId;
-    document.getElementById("peopleChatHeaderName").textContent = userName;
-    document.getElementById("peopleChatHeaderAvatar").innerHTML = userAvatar ? `<img src="${userAvatar}">` : userName[0].toUpperCase();
-    document.getElementById("peopleProfileName").textContent = userName;
-    document.getElementById("peopleProfileAvatar").src = userAvatar || "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_000000007068824385c56cb176258343.png";
-    
-    document.getElementById("peopleChatMessages").innerHTML = "";
-    document.getElementById("peopleChatScreen").hidden = false;
-    
-    try {
-      const msgs = await api(`/api/messages/${userId}`);
-      const box = document.getElementById("peopleChatMessages");
-      msgs.forEach(m => {
-        const isMe = m.from_id === myUser.id;
-        box.innerHTML += `<div class="msg ${isMe ? 'user' : 'assistant'}">${m.text}</div>`;
-      });
-      box.scrollTop = box.scrollHeight;
-    } catch (e) { console.error(e); }
-  }
-
-  async function sendPeopleMessage() {
-    const input = document.getElementById("peopleChatInput");
-    const text = input.value.trim();
-    if (!text || !currentPeopleChat) return;
-    input.value = "";
-    const box = document.getElementById("peopleChatMessages");
-    box.innerHTML += `<div class="msg user">${text}</div>`;
-    box.scrollTop = box.scrollHeight;
-    
-    try {
-      await api("/api/messages", "POST", { to_id: currentPeopleChat, text: text });
-    } catch (e) { alert("Ошибка отправки"); }
-  }
-
-  function openPeopleProfile() {
-    document.getElementById("peopleProfileModal").hidden = false;
-  }
-
-  async function followUser() {
-    try {
-      await api("/api/follow", "POST", { target_id: currentPeopleUserId });
-      document.getElementById("followBtn").textContent = "Вы подписаны";
-      document.getElementById("followBtn").disabled = true;
-      alert("Вы подписались на " + document.getElementById("peopleProfileName").textContent);
-      loadProfileStats(); // обновляем счетчики
-    } catch (e) {
-      alert(e.message);
-    }
-  }
-
-  let charAvatarData = "";
-  function showCharAvatar(input) {
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        charAvatarData = e.target.result;
-        document.getElementById('charPreview').src = e.target.result;
-        document.getElementById('charPreview').style.display = 'block';
-        document.getElementById('charPlus').style.display = 'none';
-      };
-      reader.readAsDataURL(input.files[0]);
-    }
-  }
-
-  async function saveCharacter() {
-    const name = document.getElementById("newCharName").value.trim();
-    const tagline = document.getElementById("newCharTagline").value.trim();
-    const prompt = document.getElementById("newCharPrompt").value.trim();
-    if (!name || !prompt) return alert("Заполни имя и характер");
-    try {
-      await api("/api/characters", "POST", { name: name, tagline: tagline, prompt: prompt, avatar: charAvatarData });
-      alert("Персонаж создан!");
-      document.getElementById("screen-create").hidden = true;
-      document.getElementById("screen-home").hidden = false;
-      document.getElementById("screen-home").style.display = "block";
-      loadCharacters();
-    } catch (e) { alert(e.message); }
-  }
-
+  // ==================== НАВИГАЦИЯ ====================
   function showScreen(name, btn) {
-    ['home', 'chats', 'create', 'profile'].forEach(s => {
+    const mainHeader = document.getElementById('mainHeader');
+    if (name === 'home') {
+      mainHeader.hidden = false;
+      document.querySelector('.layout').style.height = 'calc(100vh - 61px)';
+    } else {
+      mainHeader.hidden = true;
+      document.querySelector('.layout').style.height = '100vh';
+    }
+
+    ['home', 'chats', 'create', 'league', 'profile'].forEach(s => {
       document.getElementById('screen-' + s).hidden = s !== name;
     });
-    document.querySelectorAll('.nav-btn, .bottom-nav button').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
     
-    if (name === 'profile') loadApiKeyToInput();
-    if (name === 'home') loadPeople();
+    document.querySelectorAll('.nav-btn, .bottom-nav button').forEach(b => b.classList.remove('active'));
+    if (btn) {
+      btn.classList.add('active');
+      const isBottom = btn.closest('.bottom-nav');
+      const targetSelector = isBottom ? '.nav-btn' : '.bottom-nav button';
+      const index = isBottom
+        ? Array.from(btn.parentElement.children).indexOf(btn)
+        : Array.from(btn.parentElement.children).filter(el => el.classList.contains('nav-btn')).indexOf(btn);
+      const targetBtns = document.querySelectorAll(targetSelector);
+      if (targetBtns[index]) targetBtns[index].classList.add('active');
+    }
+
+    if (name === 'league') renderLeagueScreen();
+    if (name === 'profile') loadProfileData();
   }
 
-  function filterCards(type, btn) {
-    document.querySelectorAll('#filter-container .filter').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const charsSection = document.getElementById('characters-section');
-    const gamesSection = document.getElementById('games-section');
-    const peopleSection = document.getElementById('people-section');
-    const cards = document.querySelectorAll('#chars-grid .card-char');
+  // ==================== ЛИГИ ====================
+  const LEAGUES = [
+    { id: 'b5', name: 'Бронза V', title: 'Путник', min: 0, max: 749, color: '#cd7f32' },
+    { id: 'b4', name: 'Бронза IV', title: 'Путник', min: 750, max: 1499, color: '#cd7f32' },
+    { id: 'b3', name: 'Бронза III', title: 'Путник', min: 1500, max: 2249, color: '#cd7f32' },
+    { id: 'b2', name: 'Бронза II', title: 'Путник', min: 2250, max: 2999, color: '#cd7f32' },
+    { id: 'b1', name: 'Бронза I', title: 'Путник', min: 3000, max: 3749, color: '#cd7f32' },
+
+    { id: 's5', name: 'Серебро V', title: 'Собеседник', min: 3750, max: 4499, color: '#c0c0c0' },
+    { id: 's4', name: 'Серебро IV', title: 'Собеседник', min: 4500, max: 5249, color: '#c0c0c0' },
+    { id: 's3', name: 'Серебро III', title: 'Собеседник', min: 5250, max: 5999, color: '#c0c0c0' },
+    { id: 's2', name: 'Серебро II', title: 'Собеседник', min: 6000, max: 6749, color: '#c0c0c0' },
+    { id: 's1', name: 'Серебро I', title: 'Собеседник', min: 6750, max: 7499, color: '#c0c0c0' },
+
+    { id: 'g5', name: 'Золото V', title: 'Мудрец', min: 7500, max: 8249, color: '#ffd700' },
+    { id: 'g4', name: 'Золото IV', title: 'Мудрец', min: 8250, max: 8999, color: '#ffd700' },
+    { id: 'g3', name: 'Золото III', title: 'Мудрец', min: 9000, max: 9749, color: '#ffd700' },
+    { id: 'g2', name: 'Золото II', title: 'Мудрец', min: 9750, max: 10499, color: '#ffd700' },
+    { id: 'g1', name: 'Золото I', title: 'Мудрец', min: 10500, max: 11249, color: '#ffd700' },
+
+    { id: 'p5', name: 'Платина V', title: 'Хранитель', min: 11250, max: 11999, color: '#a8d8ea' },
+    { id: 'p4', name: 'Платина IV', title: 'Хранитель', min: 12000, max: 12749, color: '#a8d8ea' },
+    { id: 'p3', name: 'Платина III', title: 'Хранитель', min: 12750, max: 13499, color: '#a8d8ea' },
+    { id: 'p2', name: 'Платина II', title: 'Хранитель', min: 13500, max: 14249, color: '#a8d8ea' },
+    { id: 'p1', name: 'Платина I', title: 'Хранитель', min: 14250, max: 14999, color: '#a8d8ea' },
+
+    { id: 'l5', name: 'Легенда V', title: 'Архитектор', min: 15000, max: 15749, color: '#f0d99b' },
+    { id: 'l4', name: 'Легенда IV', title: 'Архитектор', min: 15750, max: 16499, color: '#f0d99b' },
+    { id: 'l3', name: 'Легенда III', title: 'Архитектор', min: 16500, max: 17249, color: '#f0d99b' },
+    { id: 'l2', name: 'Легенда II', title: 'Архитектор', min: 17250, max: 17999, color: '#f0d99b' },
+    { id: 'l1', name: 'Легенда I', title: 'Архитектор', min: 18000, max: 999999, color: '#f0d99b' }
+  ];
+
+  function getLeagueSVG(color) {
+    return `
+      <svg viewBox="0 0 100 100" width="100%" height="100%">
+        <defs>
+          <linearGradient id="grad_${color.replace('#','')}" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${color}" stop-opacity="1"/>
+            <stop offset="100%" stop-color="${color}" stop-opacity="0.5"/>
+          </linearGradient>
+        </defs>
+        <polygon points="50,5 95,50 50,95 5,50" fill="none" stroke="url(#grad_${color.replace('#','')})" stroke-width="3" stroke-linejoin="round"/>
+        <polygon points="50,15 85,50 50,85 15,50" fill="rgba(255,255,255,0.05)" stroke="url(#grad_${color.replace('#','')})" stroke-width="1" stroke-linejoin="round"/>
+        <path d="M 50,30 L 50,70 M 40,40 L 60,40 M 40,60 L 60,60" stroke="url(#grad_${color.replace('#','')})" stroke-width="4" stroke-linecap="round" fill="none"/>
+      </svg>
+    `;
+  }
+
+  function getCurrentLeague(rp) {
+    for (let i = LEAGUES.length - 1; i >= 0; i--) {
+      if (rp >= LEAGUES[i].min) return LEAGUES[i];
+    }
+    return LEAGUES[0];
+  }
+
+  function renderLeagueScreen() {
+    const rp = myUser ? (myUser.rp || 0) : 0;
+    const currentLeague = getCurrentLeague(rp);
+    const leagueIdx = LEAGUES.indexOf(currentLeague);
+    const nextLeague = LEAGUES[leagueIdx + 1];
     
-    if (type === 'game') {
-      charsSection.hidden = true; gamesSection.hidden = false; peopleSection.hidden = true;
-    } else if (type === 'people') {
-      charsSection.hidden = true; gamesSection.hidden = true; peopleSection.hidden = false;
-      loadPeople();
+    document.getElementById('mainRPText').textContent = rp + " RP";
+    document.getElementById('mainRankName').textContent = currentLeague.name;
+    document.getElementById('mainRankTitle').textContent = currentLeague.title;
+    document.getElementById('mainRankIcon').innerHTML = getLeagueSVG(currentLeague.color);
+    
+    const range = Math.max(1, currentLeague.max - currentLeague.min);
+    const progress = rp - currentLeague.min;
+    const percent = Math.min(100, Math.max(0, (progress / range) * 100));
+    document.getElementById('mainProgressFill').style.width = `${percent}%`;
+    document.getElementById('mainMinRP').textContent = currentLeague.min + " RP";
+    document.getElementById('mainMaxRP').textContent = currentLeague.max === 999999 ? "∞" : currentLeague.max + " RP";
+    
+    if (nextLeague) {
+      document.getElementById('mainNextText').textContent = `До ${nextLeague.name}: ${nextLeague.min - rp} RP`;
     } else {
-      charsSection.hidden = false; gamesSection.hidden = true; peopleSection.hidden = true;
-      cards.forEach(c => {
-        if (type === 'all') c.hidden = false;
-        else if (type === 'system') c.hidden = (c.dataset.category !== 'system');
-        else if (type === 'popular') c.hidden = (c.dataset.category !== 'popular');
-        else if (type === 'new') c.hidden = (c.dataset.category !== 'new');
-      });
+      document.getElementById('mainNextText').textContent = "Максимальный ранг!";
+    }
+
+    const container = document.getElementById('leagueListContainer');
+    container.innerHTML = '';
+    LEAGUES.forEach(league => {
+      const isActive = league.id === currentLeague.id;
+      const card = document.createElement('div');
+      card.className = `league-card ${isActive ? 'active' : ''}`;
+      card.innerHTML = `
+        <div class="league-card-icon">${getLeagueSVG(league.color)}</div>
+        <div class="league-card-body">
+          <div class="league-card-name">${league.name} <span class="league-card-title" style="color:${league.color}">${league.title}</span></div>
+          <div class="league-card-rp">${league.min} - ${league.max === 999999 ? '∞' : league.max} RP</div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  // ==================== ПРОФИЛЬ ====================
+  async function loadProfileData() {
+    const rp = myUser ? (myUser.rp || 0) : 0;
+    const currentLeague = getCurrentLeague(rp);
+    const nextLeague = LEAGUES[LEAGUES.indexOf(currentLeague) + 1];
+
+    document.getElementById('profileLeagueName').textContent = currentLeague.name;
+    document.getElementById('profileLeagueIcon').innerHTML = getLeagueSVG(currentLeague.color);
+    document.getElementById('profileRPText').textContent = rp + " RP";
+    document.getElementById('profileNextLeagueText').textContent = nextLeague
+      ? `До ${nextLeague.name}: ${nextLeague.min - rp} RP`
+      : "Максимальный ранг!";
+
+    if (!token) return;
+    try {
+      const data = await api("/api/me");
+      myUser = data;
+      
+      document.getElementById('profileUsername').textContent = data.username;
+      document.getElementById('profileAvatarLetter').textContent = data.username[0].toUpperCase();
+      document.getElementById('profileCoinCount').textContent = data.coins || 0;
+      document.getElementById('profileFollowingCount').textContent = data.following || 0;
+      document.getElementById('profileSubsCount').textContent = data.followers || 0;
+      document.getElementById('profileMsgCount').textContent = data.messages_count || 0;
+      
+      if (data.league) {
+        document.getElementById('profileLeagueName').textContent = data.league.name;
+        document.getElementById('profileLeagueIcon').innerHTML = getLeagueSVG(getCurrentLeague(data.rp || 0).color);
+        document.getElementById('profileLeagueProgress').style.width = `${data.league.progress || 0}%`;
+        document.getElementById('profileRPText').textContent = (data.rp || 0) + " RP";
+      }
+
+      const achCount = (data.achievements || []).length;
+      document.getElementById('profileAchCountBadge').textContent = `${achCount} / 20`;
+      
+      if (data.theme) {
+        try {
+          const theme = JSON.parse(data.theme);
+          applyThemeObject(theme);
+        } catch(e) {}
+      }
+    } catch(e) { console.error("Ошибка загрузки профиля", e); }
+  }
+
+  // ==================== ШРИФТЫ И ТЕМА ====================
+  function applyThemeObject(theme) {
+    if (!theme || typeof theme !== 'object') return;
+    const map = {
+      bg: '--bg',
+      header: '--header-bg',
+      nav: '--nav-bg',
+      panel: '--panel',
+      panel2: '--panel2',
+      gold: '--gold',
+      text: '--text',
+      muted: '--muted',
+      border: '--border',
+      font: '--app-font'
+    };
+    Object.entries(map).forEach(([key, cssVar]) => {
+      if (theme[key]) {
+        document.documentElement.style.setProperty(cssVar, theme[key]);
+        const input = document.getElementById('input-' + key);
+        if (input) input.value = theme[key];
+      }
+    });
+    if (theme.font) {
+      const fontSelect = document.getElementById('fontSelect');
+      if (fontSelect) fontSelect.value = theme.font;
     }
   }
 
-  function switchEditorMode(mode, btn) {
-    document.querySelectorAll('#editor-mode-switch .mode-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('editor-char-container').hidden = mode !== 'char';
-    document.getElementById('editor-game-container').hidden = mode !== 'game';
+  function changeFont(fontFamily) {
+    document.documentElement.style.setProperty('--app-font', fontFamily);
+    const saved = JSON.parse(localStorage.getItem('noglik_theme') || '{}');
+    saved.font = fontFamily;
+    localStorage.setItem('noglik_theme', JSON.stringify(saved));
   }
-  
-  document.cStep = 0;
+
+  function loadFont() {
+    const saved = JSON.parse(localStorage.getItem('noglik_theme') || '{}');
+    applyThemeObject(saved);
+  }
+
+  function applyTheme() {
+    const theme = {
+      font: document.getElementById('fontSelect').value,
+      bg: document.getElementById('input-bg').value.trim(),
+      header: document.getElementById('input-header').value.trim(),
+      nav: document.getElementById('input-nav').value.trim(),
+      panel: document.getElementById('input-panel').value.trim(),
+      panel2: document.getElementById('input-panel2').value.trim(),
+      gold: document.getElementById('input-gold').value.trim(),
+      text: document.getElementById('input-text').value.trim(),
+      muted: document.getElementById('input-muted').value.trim(),
+      border: document.getElementById('input-border').value.trim(),
+    };
+    applyThemeObject(theme);
+    localStorage.setItem('noglik_theme', JSON.stringify(theme));
+    if (token) {
+      api('/api/theme', 'POST', { theme }).catch(e => console.error(e));
+    }
+    document.getElementById('colorModal').hidden = true;
+  }
+
+  function resetTheme() {
+    localStorage.removeItem('noglik_theme');
+    const defaults = {
+      font: "'Inter', sans-serif",
+      bg: '#071c16',
+      header: '#0f2e24',
+      nav: '#071c16',
+      panel: '#0d2920',
+      panel2: '#12352a',
+      gold: '#d9b66d',
+      text: '#f5f2e9',
+      muted: '#a6b8ad',
+      border: 'rgba(217,182,109,.15)'
+    };
+    applyThemeObject(defaults);
+    if (token) {
+      api('/api/theme', 'POST', { theme: defaults }).catch(e => console.error(e));
+    }
+  }
+
+  // ==================== НАСТРОЙКИ ИИ ====================
+  function loadAiSettings() {
+    const providerSelect = document.getElementById('aiProviderSelect');
+    const keyLabel = document.getElementById('aiKeyLabel');
+    const keyInput = document.getElementById('aiKeyInput');
+    
+    if (providerSelect) providerSelect.value = currentProvider;
+    
+    const providerNames = { gemini: "Gemini", groq: "Groq", openrouter: "OpenRouter" };
+    if (keyLabel) keyLabel.textContent = `${providerNames[currentProvider]} API-ключ`;
+    if (keyInput) keyInput.value = localStorage.getItem(`${currentProvider}_key`) || "";
+  }
+
+  function saveAiSettings() {
+    const providerSelect = document.getElementById('aiProviderSelect');
+    const keyInput = document.getElementById('aiKeyInput');
+    if (!providerSelect || !keyInput) return;
+    
+    currentProvider = providerSelect.value;
+    localStorage.setItem("ai_provider", currentProvider);
+    localStorage.setItem(`${currentProvider}_key`, keyInput.value.trim());
+    alert("Настройки ИИ сохранены!");
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const providerSelect = document.getElementById('aiProviderSelect');
+    if (providerSelect) {
+      providerSelect.addEventListener('change', function() {
+        const providerNames = { gemini: "Gemini", groq: "Groq", openrouter: "OpenRouter" };
+        document.getElementById('aiKeyLabel').textContent = `${providerNames[this.value]} API-ключ`;
+        document.getElementById('aiKeyInput').value = localStorage.getItem(`${this.value}_key`) || "";
+      });
+    }
+  });
+
+  // ==================== СИСТЕМА АЧИВОК ====================
+  const achievementsList = [
+    { id: 'msg_1', title: 'Первое слово', desc: 'Отправить 1 сообщение', reward: 3 },
+    { id: 'msg_100', title: 'Собеседник', desc: 'Отправить 100 сообщений', reward: 1 },
+    { id: 'msg_250', title: 'Болтун', desc: 'Отправить 250 сообщений', reward: 2 },
+    { id: 'msg_500', title: 'Мастер диалога', desc: 'Отправить 500 сообщений', reward: 5 },
+    { id: 'forest_win', title: 'Выживший', desc: 'Пройти игру «Тёмный лес»', reward: 6 },
+    { id: 'subs_1', title: 'Первое признание', desc: 'Получить 1 подписчика', reward: 3 },
+    { id: 'subs_10', title: 'Известность', desc: 'Получить 10 подписчиков', reward: 6 },
+    { id: 'subs_50', title: 'Популярность', desc: 'Получить 50 подписчиков', reward: 12 },
+    { id: 'char_1', title: 'Дебют автора', desc: 'Выпустить 1 персонажа', reward: 3 },
+    { id: 'char_5', title: 'Сценарист', desc: 'Выпустить 5 персонажей', reward: 6 },
+    { id: 'char_10', title: 'Создатель миров', desc: 'Выпустить 10 персонажей', reward: 9 },
+    { id: 'char_25', title: 'Архитектор душ', desc: 'Выпустить 25 персонажей', reward: 12 },
+    { id: 'game_1', title: 'Геймдизайнер', desc: 'Выпустить 1 игру', reward: 5 },
+    { id: 'game_3', title: 'Разработчик', desc: 'Выпустить 3 игры', reward: 10 },
+    { id: 'game_5', title: 'Студия игр', desc: 'Выпустить 5 игр', reward: 15 },
+    { id: 'game_10', title: 'Легенда индустрии', desc: 'Выпустить 10 игр', reward: 20 },
+    { id: 'streak_3', title: 'Постоянный гость', desc: 'Заходить 3 дня подряд', reward: 10 },
+    { id: 'streak_7', title: 'Преданный игрок', desc: 'Заходить 7 дней подряд', reward: 100 },
+    { id: 'likes_1', title: 'Симпатия', desc: 'Персонаж получил 1 лайк', reward: 7 },
+    { id: 'likes_5', title: 'Любимец публики', desc: 'Персонаж получил 5 лайков', reward: 14 }
+  ];
+
+  function openAchievements() {
+    const container = document.getElementById('achievementsGridContainer');
+    container.innerHTML = '';
+    
+    let unlockedCount = 0;
+    const unlockedIds = (myUser && myUser.achievements) ? myUser.achievements : [];
+    
+    achievementsList.forEach(ach => {
+      const isUnlocked = unlockedIds.includes(ach.id);
+      if (isUnlocked) unlockedCount++;
+
+      const card = document.createElement('div');
+      card.className = `achievement-card ${isUnlocked ? 'unlocked' : ''}`;
+      card.innerHTML = `
+        <div class="achievement-title">${ach.title}</div>
+        <div class="achievement-desc">${ach.desc}</div>
+        <div class="achievement-reward">+${ach.reward} монет</div>
+        <div class="achievement-status">${isUnlocked ? 'Получено' : 'Закрыто'}</div>
+      `;
+      container.appendChild(card);
+    });
+
+    document.getElementById('achCoins').textContent = (myUser && myUser.coins) ? myUser.coins : 0;
+    document.getElementById('achCount').textContent = unlockedCount;
+    document.getElementById('achievementsModal').style.display = 'flex';
+  }
+
+  function closeAchievements() {
+    document.getElementById('achievementsModal').style.display = 'none';
+  }
+
+  function unlockAchievement(id) {
+    if (myUser && myUser.achievements && myUser.achievements.includes(id)) return;
+    const ach = achievementsList.find(a => a.id === id);
+    if (!ach) return;
+
+    if (!myUser) myUser = { achievements: [], coins: 0 };
+    if (!myUser.achievements) myUser.achievements = [];
+
+    if (token) {
+      api("/api/add_achievement", "POST", { achievement_id: id })
+        .then(res => {
+          if (!res.already_unlocked) {
+            myUser.achievements.push(id);
+            myUser.coins = res.coins ?? ((myUser.coins || 0) + ach.reward);
+            showAchievementToast(`Достижение: ${ach.title} (+${ach.reward} монет)`);
+          }
+        })
+        .catch(e => console.log("Ошибка ачивки:", e));
+    } else {
+      myUser.achievements.push(id);
+      myUser.coins = (myUser.coins || 0) + ach.reward;
+      showAchievementToast(`Достижение: ${ach.title} (+${ach.reward} монет)`);
+    }
+  }
+
+  function checkAllAchievements() {
+    const msgs = Math.max(gameState.messagesCount || 0, myUser?.messages_count || 0);
+    if (msgs >= 1) unlockAchievement('msg_1');
+    if (msgs >= 100) unlockAchievement('msg_100');
+    if (msgs >= 250) unlockAchievement('msg_250');
+    if (msgs >= 500) unlockAchievement('msg_500');
+
+    const chars = gameState.createdCharsCount || 0;
+    if (chars >= 1) unlockAchievement('char_1');
+    if (chars >= 5) unlockAchievement('char_5');
+    if (chars >= 10) unlockAchievement('char_10');
+    if (chars >= 25) unlockAchievement('char_25');
+
+    const games = gameState.createdGamesCount || 0;
+    if (games >= 1) unlockAchievement('game_1');
+    if (games >= 3) unlockAchievement('game_3');
+    if (games >= 5) unlockAchievement('game_5');
+    if (games >= 10) unlockAchievement('game_10');
+  }
+
+  function showAchievementToast(text) {
+    const toast = document.createElement('div');
+    toast.style.cssText = `position:fixed; top:70px; left:50%; transform:translateX(-50%); background:var(--panel2); color:var(--gold2); border:1px solid var(--gold); padding:10px 18px; border-radius:12px; font-size:13px; font-weight:700; z-index:999; box-shadow:0 6px 20px rgba(0,0,0,0.6); text-align:center;`;
+    toast.textContent = text;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+  }
+
+  // ==================== ЧАТ, ПРОФИЛЬ ПЕРСОНАЖА И ИГРА ====================
+  let currentCharData = null;
+  function openChat(name, avatarUrl, desc, welcomeMsg, aboutText, charId = 'obichniy_ii') {
+    currentCharData = { name, avatarUrl, desc, aboutText, charId };
+    currentCharId = charId;
+    chatHistory = [];
+    document.getElementById('chatHeaderName').textContent = name;
+    document.getElementById('chatHeaderImg').src = avatarUrl;
+    document.getElementById('chatInputArea').style.display = 'flex';
+    document.getElementById('gameControls').style.display = 'none';
+    
+    const msgContainer = document.getElementById('chatMessagesContainer');
+    msgContainer.innerHTML = ''; 
+    if (welcomeMsg) {
+      const welcomeDiv = document.createElement('div');
+      welcomeDiv.className = 'msg assistant';
+      welcomeDiv.textContent = welcomeMsg;
+      msgContainer.appendChild(welcomeDiv);
+      chatHistory.push({ role: 'assistant', content: welcomeMsg });
+    }
+    document.getElementById('chatScreen').hidden = false;
+  }
+
+  async function handleSendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+    const msgContainer = document.getElementById('chatMessagesContainer');
+    const userDiv = document.createElement('div');
+    userDiv.className = 'msg user';
+    userDiv.textContent = text;
+    msgContainer.appendChild(userDiv);
+    chatHistory.push({ role: 'user', content: text });
+    input.value = '';
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+
+    onSendMessage();
+
+    const geminiKey = localStorage.getItem('gemini_key') || '';
+    if (!geminiKey) {
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'msg assistant';
+      infoDiv.textContent = 'Укажи Gemini API-ключ в разделе «Профиль», чтобы персонаж отвечал через ИИ.';
+      msgContainer.appendChild(infoDiv);
+      msgContainer.scrollTop = msgContainer.scrollHeight;
+      return;
+    }
+
+    try {
+      const res = await api('/chat', 'POST', {
+        api_key: geminiKey,
+        character_id: currentCharId,
+        messages: chatHistory
+      });
+      const replyDiv = document.createElement('div');
+      replyDiv.className = 'msg assistant';
+      replyDiv.textContent = res.reply;
+      msgContainer.appendChild(replyDiv);
+      chatHistory.push({ role: 'assistant', content: res.reply });
+      msgContainer.scrollTop = msgContainer.scrollHeight;
+    } catch (e) {
+      const errDiv = document.createElement('div');
+      errDiv.className = 'msg assistant';
+      errDiv.style.color = 'var(--danger)';
+      errDiv.textContent = e.message;
+      msgContainer.appendChild(errDiv);
+      msgContainer.scrollTop = msgContainer.scrollHeight;
+    }
+  }
+
+  function openCharProfileFromChat() {
+    if (!currentCharData) return;
+    document.getElementById('profCharName').textContent = currentCharData.name;
+    document.getElementById('profCharImg').src = currentCharData.avatarUrl;
+    document.getElementById('profCharDesc').textContent = currentCharData.desc;
+    document.getElementById('profCharAbout').textContent = currentCharData.aboutText || "Информация уточняется.";
+    document.getElementById('charProfileScreen').hidden = false;
+  }
+
+  function updateRatingValue(val) {
+    document.getElementById('charRatingValue').textContent = val;
+  }
+
+  function toggleRatingAction() {
+    const check = document.getElementById('ratingIconCheck');
+    const gear = document.getElementById('ratingIconGear');
+    const isCheck = check.style.display !== 'none';
+    check.style.display = isCheck ? 'none' : 'block';
+    gear.style.display = isCheck ? 'block' : 'none';
+  }
+
+  // ==================== ИГРА "ТЁМНЫЙ ЛЕС" ====================
+  const gameScript = {
+    "start": { text: "Ты просыпаешься на сырой земле...", choices: [{ text: "Взять фонарь", next: "step2_fire" }, { text: "Бежать", next: "step2_run" }] },
+    "step2_fire": { text: "Ты идешь на звук...", choices: [{ text: "Зайти в хижину", next: "step3_hut" }, { text: "Обойти", next: "step3_path" }] },
+    "step2_run": { text: "Ты падаешь в овраг...", choices: [{ text: "Ползти", next: "lose_1" }] },
+    "step3_hut": { text: "Внутри старик...", choices: [{ text: "Спросить", next: "step4_talk" }, { text: "Схватить карту", next: "step4_steal" }] },
+    "step3_path": { text: "Ты находишь лодку...", choices: [{ text: "Плыть", next: "step4_boat" }, { text: "Идти пешком", next: "step4_walk" }] },
+    "step4_talk": { text: "Старик говорит...", choices: [{ text: "Бросить фонарь", next: "win" }, { text: "Оставить", next: "lose_2" }] },
+    "step4_steal": { text: "Ты хватаешь карту...", choices: [{ text: "Бежать", next: "lose_2" }] },
+    "step4_boat": { text: "Лодка плывет...", choices: [{ text: "Прыгнуть", next: "win" }, { text: "Остаться", next: "lose_3" }] },
+    "step4_walk": { text: "Ты видишь мост...", choices: [{ text: "Красться", next: "win" }, { text: "Бежать", next: "lose_1" }] },
+    "win": { text: "ПОБЕДА! Ты выбрался.", choices: [{ text: "Выйти", next: "end" }] },
+    "lose_1": { text: "ПРОИГРЫШ. Ты потерялся.", choices: [{ text: "Выйти", next: "end" }] },
+    "lose_2": { text: "ПРОИГРЫШ. Болото затянуло.", choices: [{ text: "Выйти", next: "end" }] },
+    "lose_3": { text: "ПРОИГРЫШ. Водопад.", choices: [{ text: "Выйти", next: "end" }] }
+  };
+
+  function startGame() {
+    document.getElementById('chatHeaderName').textContent = "Тёмный лес";
+    document.getElementById('chatHeaderImg').src = "https://raw.githubusercontent.com/Noglik-sudo/nogliktalk-images/main/file_00000000812c81f4ade4eebfef4084f4.png";
+    document.getElementById('chatInputArea').style.display = 'none';
+    document.getElementById('gameControls').style.display = 'flex';
+    document.getElementById('chatMessagesContainer').innerHTML = ''; 
+    document.getElementById('chatScreen').hidden = false;
+    renderGameScene('start');
+  }
+
+  function renderGameScene(sceneKey) {
+    if (sceneKey === 'end') { document.getElementById('chatScreen').hidden = true; return; }
+    if (sceneKey === 'win') unlockAchievement('forest_win');
+    
+    const scene = gameScript[sceneKey];
+    const msgContainer = document.getElementById('chatMessagesContainer');
+    const controlsContainer = document.getElementById('gameControls');
+    
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'msg assistant';
+    if (sceneKey === 'win') msgDiv.style.color = '#7ee28b';
+    if (sceneKey.startsWith('lose')) msgDiv.style.color = 'var(--danger)';
+    msgDiv.textContent = scene.text;
+    msgContainer.appendChild(msgDiv);
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+
+    controlsContainer.innerHTML = '';
+    scene.choices.forEach(choice => {
+      const btn = document.createElement('button');
+      btn.className = 'game-choice-btn';
+      if (choice.next === 'end') btn.classList.add('game-end-btn');
+      btn.textContent = choice.text;
+      btn.onclick = () => {
+        const userMsg = document.createElement('div');
+        userMsg.className = 'msg user';
+        userMsg.textContent = choice.text;
+        msgContainer.appendChild(userMsg);
+        renderGameScene(choice.next);
+      };
+      controlsContainer.appendChild(btn);
+    });
+  }
+
+  // ==================== ОСТАЛЬНОЕ ====================
+  function filterCards(type, btn) {
+    document.querySelectorAll('#filter-container .filter').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    const cards = document.querySelectorAll('#chars-grid .card-char');
+    cards.forEach(c => {
+      if (type === 'all') c.hidden = (c.dataset.category === 'game');
+      else if (type === 'system') c.hidden = (c.dataset.category !== 'system');
+      else if (type === 'popular') c.hidden = (c.dataset.category !== 'popular');
+      else if (type === 'game') c.hidden = (c.dataset.category !== 'game');
+      else if (type === 'new') c.hidden = (c.dataset.category !== 'new');
+    });
+  }
+
+  function handleSearch() {
+    const query = document.getElementById('searchInput').value.toLowerCase().trim();
+    const cards = document.querySelectorAll('#chars-grid .card-char');
+    const title = document.getElementById('chars-title');
+    if (query === "") {
+      filterCards('all', document.querySelector('.filter'));
+      title.textContent = "Персонажи";
+      return;
+    }
+    title.textContent = "Результаты поиска:";
+    cards.forEach(c => {
+      const cardTitle = c.getAttribute('data-title').toLowerCase();
+      c.hidden = !cardTitle.includes(query);
+    });
+  }
+
+  function switchChatTab(type, btn) {
+    document.querySelectorAll('.chat-tabs .mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('chat-list-chars').hidden = type !== 'chars';
+    document.getElementById('chat-list-games').hidden = type !== 'games';
+    document.getElementById('chat-list-people').hidden = type !== 'people';
+  }
+
+  function switchCreateMode(mode, btn) {
+    document.querySelectorAll('#create-mode-switch .mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('create-char-editor').hidden = mode !== 'char';
+    document.getElementById('create-game-editor').hidden = mode !== 'game';
+  }
+
+  let currentCharStep = 0;
   function switchCharStep(step) {
-    if (step < 0) step = 0; if (step > 2) step = 2; document.cStep = step;
-    document.querySelectorAll('#editor-char-container .step-btn').forEach((b, i) => b.classList.toggle('active', i === step));
+    if (step < 0) step = 0; if (step > 2) step = 2; 
+    currentCharStep = step;
+    document.querySelectorAll('.step-btn').forEach((b, i) => b.classList.toggle('active', i === step));
     document.getElementById('c-step-0').hidden = step !== 0;
     document.getElementById('c-step-1').hidden = step !== 1;
     document.getElementById('c-step-2').hidden = step !== 2;
@@ -717,17 +1265,122 @@ button:active, .filter:active, .nav-btn:active, .bottom-nav button:active, .mode
     document.getElementById('btn-sub-c').style.display = step === 2 ? 'block' : 'none';
   }
 
-  if (token) {
-    api("/api/me").then(data => {
-      myUser = data;
-      document.getElementById("authScreen").hidden = true;
-      document.getElementById("app").hidden = false;
-      initApp();
-    }).catch(() => {
-      localStorage.removeItem("socium_token");
-      token = null;
-    });
+  function switchGameType(type, btn) {
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('editor-action').hidden = type !== 'action';
+    document.getElementById('editor-quiz').hidden = type !== 'quiz';
+    document.getElementById('editor-mafia').hidden = type !== 'mafia';
   }
+
+  function addNewScene() {
+    const container = document.getElementById('scenes-container');
+    const count = container.querySelectorAll('.scene-block').length + 1;
+    const newScene = document.createElement('div');
+    newScene.className = 'block-card scene-block';
+    newScene.innerHTML = `
+      <div class="block-header"><h4>Сцена ${count}</h4><button class="delete-btn" onclick="this.closest('.scene-block').remove()">✕</button></div>
+      <div class="field"><textarea class="textarea" rows="3" placeholder="Текст сцены..."></textarea></div>
+      <div class="choice-row"><input type="text" placeholder="Текст кнопки" value="Действие"><select><option>К Сцене 1</option><option>К Сцене 2</option></select><button class="delete-btn" onclick="this.parentElement.remove()">✕</button></div>
+      <button class="btn outline small" style="width: 100%;" onclick="addChoiceToScene(this)">+ Добавить кнопку</button>
+    `;
+    container.appendChild(newScene);
+  }
+
+  function addChoiceToScene(btn) {
+    const row = document.createElement('div');
+    row.className = 'choice-row';
+    row.innerHTML = `<input type="text" placeholder="Текст кнопки" value="Действие"><select><option>К Сцене 1</option><option>К Сцене 2</option></select><button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
+    btn.parentElement.insertBefore(row, btn);
+  }
+
+  function addNewQuestion() {
+    const container = document.getElementById('questions-container');
+    const count = container.querySelectorAll('.question-block').length + 1;
+    const qName = 'q' + count; 
+    const newQ = document.createElement('div');
+    newQ.className = 'block-card question-block';
+    newQ.innerHTML = `
+      <div class="block-header"><h4>Вопрос ${count}</h4><button class="delete-btn" onclick="this.closest('.question-block').remove()">✕</button></div>
+      <div class="field"><input class="input" placeholder="Вопрос"></div>
+      <label style="font-size:12px; color:var(--gold2); display:block; margin-bottom:12px; font-weight:600;">Отметьте правильный ответ:</label>
+      <div class="quiz-option"><input type="radio" name="${qName}"><input class="input" type="text" placeholder="Вариант 1"></div>
+      <div class="quiz-option"><input type="radio" name="${qName}"><input class="input" type="text" placeholder="Вариант 2"></div>
+      <div class="quiz-option"><input type="radio" name="${qName}"><input class="input" type="text" placeholder="Вариант 3"></div>
+      <div class="quiz-option"><input type="radio" name="${qName}"><input class="input" type="text" placeholder="Вариант 4"></div>
+    `;
+    container.appendChild(newQ);
+  }
+
+  function addNewSuspect() {
+    const container = document.getElementById('suspects-container');
+    const count = container.querySelectorAll('.suspect-block').length + 1;
+    const newSus = document.createElement('div');
+    newSus.className = 'block-card suspect-block';
+    newSus.innerHTML = `
+      <div class="block-header"><h4>Подозреваемый ${count}</h4><button class="delete-btn" onclick="this.closest('.suspect-block').remove()">✕</button></div>
+      <div class="field"><input class="input" placeholder="Имя"></div>
+      <div class="field"><textarea class="textarea" rows="2" placeholder="Алиби / Описание..."></textarea></div>
+    `;
+    container.appendChild(newSus);
+  }
+
+  function addNewClue() {
+    const container = document.getElementById('clues-container');
+    const newClue = document.createElement('div');
+    newClue.className = 'block-card clue-block';
+    newClue.innerHTML = `
+      <div class="field" style="display:flex; gap:10px;">
+        <input class="input" placeholder="Текст улики...">
+        <button class="delete-btn" onclick="this.closest('.clue-block').remove()">✕</button>
+      </div>
+    `;
+    container.appendChild(newClue);
+  }
+
+  function onSendMessage() {
+    gameState.messagesCount++;
+    if (myUser) myUser.messages_count = (myUser.messages_count || 0) + 1;
+    saveGameState();
+    checkAllAchievements();
+  }
+
+  function onPublishCharacter() {
+    const name = document.getElementById('newCharName').value.trim();
+    if (!name) {
+      alert('Укажи имя персонажа');
+      return;
+    }
+    gameState.createdCharsCount++;
+    saveGameState();
+    checkAllAchievements();
+    alert(`Персонаж «${name}» создан!`);
+  }
+
+  function onPublishGame() {
+    gameState.createdGamesCount++;
+    saveGameState();
+    checkAllAchievements();
+    alert('Игра опубликована!');
+  }
+
+  // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+  document.addEventListener("DOMContentLoaded", () => {
+    loadFont();
+    filterCards('all', document.querySelector('.filter'));
+    loadAiSettings();
+    
+    if (token) {
+      api("/api/me").then(data => {
+        myUser = data;
+        document.getElementById('headerAvatar').textContent = data.username[0].toUpperCase();
+        if (data.theme) {
+          try { applyThemeObject(JSON.parse(data.theme)); } catch(e) {}
+        }
+      }).catch(e => console.log("Не авторизован", e));
+    }
+  });
 </script>
+
 </body>
 </html>
